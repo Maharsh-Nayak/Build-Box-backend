@@ -83,7 +83,7 @@ public class GitCloneController {
 
 
         //Now we will build it
-        ProcessBuilder buildPb = new ProcessBuilder(npmCommand, "run", "build");
+        ProcessBuilder buildPb = new ProcessBuilder(npmCommand, "run", "build", "--", "--base=./");
         buildPb.directory(cloneFile);
         try {
             buildPb.start().waitFor();
