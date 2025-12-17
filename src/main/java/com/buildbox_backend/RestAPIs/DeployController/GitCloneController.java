@@ -1,13 +1,13 @@
-package com.buildbox_backend.RestAPIs.CloneController;
+package com.buildbox_backend.RestAPIs.DeployController;
 
 import com.buildbox_backend.RequestBodies.CloneRequests.GitCloneRequest;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,13 @@ import java.util.Comparator;
 @RestController
 public class GitCloneController {
 
+    @GetMapping("/upload")
+    public String check(){
+        return "Hey";
+    }
+
+    @Autowired
+    UploadController uploadController;
 
     @PostMapping("/upload")
     public String upload(@RequestBody GitCloneRequest request){
@@ -88,8 +95,28 @@ public class GitCloneController {
 
         System.out.println("Executed build command");
 
+        // Upload the files
+        String bucketUrl=null;
 
-        return null;
+        File distFolder = new File(cloneFile, "dist");
+
+        uploadController.uploadDirectory(distFolder,"demo");
+
+
+        //Delete the clone once Uploaded
+
+        try {
+            Files.walk(cloneFile.toPath())
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Cleaned up existing directory.");
+
+
+        return bucketUrl;
 
     }
 
