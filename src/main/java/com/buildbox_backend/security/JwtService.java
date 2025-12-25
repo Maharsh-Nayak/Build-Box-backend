@@ -4,13 +4,17 @@ package com.buildbox_backend.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Service
+@PropertySource("classpath:credentials.properties")
 public class JwtService {
-    private final String SECRET ="";
+    @Value("${jwt.sercetkey}")
+    private  String SECRET;
 
     public String generateToken(String email){
         return Jwts.builder()
