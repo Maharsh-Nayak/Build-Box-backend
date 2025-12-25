@@ -48,5 +48,9 @@ public class AuthController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).build());
     }
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
+    }
 }
 
