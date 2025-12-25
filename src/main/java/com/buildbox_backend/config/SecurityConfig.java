@@ -22,6 +22,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/oauth2/**", "/public/**").permitAll()
+                        .requestMatchers("/deploy", "/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth.successHandler(successHandler));

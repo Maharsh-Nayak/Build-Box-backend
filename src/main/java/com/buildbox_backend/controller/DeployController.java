@@ -5,6 +5,8 @@ import com.buildbox_backend.service.DeployService;
 import com.buildbox_backend.service.GitCloneService;
 import com.buildbox_backend.service.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +30,7 @@ public class DeployController {
     }
 
     @PostMapping
-    public String deploy(@RequestBody GitCloneRequest request) {
+    public ResponseEntity<String> deploy(@RequestBody GitCloneRequest request) {
         System.out.println("Starting deployment for: " + request.getLink());
 
         // 1. Clone
@@ -40,13 +42,14 @@ public class DeployController {
         // 3. Upload
         File distFolder = new File(repoDir, "dist");
         // Using a generic project ID "demo" as per original code, or could derive from repo name
-        uploadService.uploadDirectory(distFolder, "demo");
+        uploadService.uploadDirectory(distFolder, request.getProjectName());
 
         // 4. Cleanup
         gitCloneService.cleanup(repoDir);
         System.out.println("Deployment finished and cleanup done.");
 
         // Returning generic response or bucket URL if we had it
-        return "Deployment successful";
+        String deployLink = "https://buildbox-frontend.s3.ap-south-1.amazonaws.com/"+request.getProjectName()+"/index.html";
+        return ResponseEntity.status(HttpStatus.CREATED).body(deployLink);
     }
 }
