@@ -43,7 +43,7 @@ public class SecurityConfig {
                 // disable default login behaviours
                 .formLogin(f -> f.disable())
                 .httpBasic(b -> b.disable())
-
+                
                 // OAuth success handler
                 .oauth2Login(oauth -> oauth.successHandler(successHandler))
 

@@ -1,16 +1,16 @@
 package com.buildbox_backend.controller;
-
-
 import com.buildbox_backend.dto.AuthResponse;
 import com.buildbox_backend.dto.LoginRequest;
 import com.buildbox_backend.dto.SignupRequest;
 import com.buildbox_backend.model.User;
 import com.buildbox_backend.repository.UserRepository;
 import com.buildbox_backend.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/auth")
@@ -52,5 +52,16 @@ public class AuthController {
     public String health() {
         return "OK";
     }
+
+    @GetMapping("/auth/google")
+    public void googleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/google");
+    }
+
+    @GetMapping("/auth/github")
+    public void githubLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/github");
+    }
+
 }
 

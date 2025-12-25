@@ -34,6 +34,7 @@ public class AuthService {
         user.setEmailVerified(true);
 
         return userRepository.save(user);
+
     }
 
     public String login(String email, String password) {
