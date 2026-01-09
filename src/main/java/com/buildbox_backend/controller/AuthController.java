@@ -5,6 +5,7 @@ import com.buildbox_backend.dto.SignupRequest;
 import com.buildbox_backend.model.User;
 import com.buildbox_backend.repository.UserRepository;
 import com.buildbox_backend.service.AuthService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,17 +25,21 @@ public class AuthController {
     // ---------- SIGNUP ----------
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request) {
+
+        System.out.println("Signup request: " + request);
+
         User user = authService.signup(request.name, request.email, request.password);
 
         String token = authService.login(request.email, request.password);
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token, request.name));
     }
 
     // ---------- LOGIN ----------
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        System.out.println("Login request: " + request.email + ", " + request.password);
         String token = authService.login(request.email, request.password);
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token, request.email));
     }
 
     // ---------- CURRENT USER ----------

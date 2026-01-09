@@ -2,18 +2,17 @@ package com.buildbox_backend.controller;
 
 import com.buildbox_backend.dto.GitCloneRequest;
 import com.buildbox_backend.service.DeployService;
+import com.buildbox_backend.service.ECSService;
 import com.buildbox_backend.service.GitCloneService;
 import com.buildbox_backend.service.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 
+@CrossOrigin(origins = "http://localhost:8082")
 @RestController
 @RequestMapping("/deploy")
 public class DeployController {
@@ -21,6 +20,7 @@ public class DeployController {
     private final GitCloneService gitCloneService;
     private final DeployService deployService;
     private final UploadService uploadService;
+
 
     @Autowired
     public DeployController(GitCloneService gitCloneService, DeployService deployService, UploadService uploadService) {
@@ -52,4 +52,5 @@ public class DeployController {
         String deployLink = "https://buildbox-frontend.s3.ap-south-1.amazonaws.com/"+request.getProjectName()+"/index.html";
         return ResponseEntity.status(HttpStatus.CREATED).body(deployLink);
     }
+
 }

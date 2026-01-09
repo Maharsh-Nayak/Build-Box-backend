@@ -35,7 +35,9 @@ public class SecurityConfig {
                                 "/health",
                                 "/deploy",
                                 "/auth/**",
-                                "/oauth2/**"
+                                "/oauth2/**",
+                                "/me",
+                                "/deployProject/v2"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

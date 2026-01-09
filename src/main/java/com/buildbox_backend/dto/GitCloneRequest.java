@@ -4,9 +4,17 @@ public class GitCloneRequest {
 
     private String link;
     private String projectName;
-    public GitCloneRequest(String link, String projectName) {
+    private String userId;
+    private String frontendDirectory;
+    private String backendDirectory;
+
+
+    public GitCloneRequest(String link, String projectName, String userId, String frontendDirectory, String backendDirectory) {
         this.link = link;
         this.projectName = projectName;
+        this.userId = userId;
+        this.frontendDirectory = frontendDirectory;
+        this.backendDirectory = backendDirectory;
     }
 
     public GitCloneRequest() {}
@@ -22,4 +30,15 @@ public class GitCloneRequest {
     public String getProjectName() {return projectName;}
 
     public void setProjectName(String projectName) {this.projectName = projectName;}
+
+    public String getUserId() {return userId;}
+    public void setUserId(String userId) {this.userId = userId;}
+
+    public String getFrontendDirectory() {return frontendDirectory;}
+
+    public void setFrontendDirectory(String frontendDirectory) {this.frontendDirectory = frontendDirectory;}
+
+    public String getBackendDirectory() {return backendDirectory;}
+
+    public void setBackendDirectory(String backendDirectory) {this.backendDirectory = backendDirectory;}
 }
