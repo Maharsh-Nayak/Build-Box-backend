@@ -11,7 +11,7 @@ echo "Installing deps..."
 npm install
 
 echo "Building..."
-npm run build
+npm run build -- --base=./
 
 echo "Uploading to S3..."
 aws s3 sync dist/ s3://buildbox-frontend/"$USER_ID"/"$PROJECT_NAME"/Frontend --delete

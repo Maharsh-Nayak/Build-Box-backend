@@ -16,7 +16,7 @@ public class ECSService {
         System.out.println("ECS Client created");
     }
 
-    public void startBuild(String gitUrl, String projectName, String userId, String backendDir, String fonrtendDir) {
+    public String startBuild(String gitUrl, String projectName, String userId, String backendDir, String fonrtendDir) {
 
         System.out.println("Starting build");
 
@@ -32,7 +32,7 @@ public class ECSService {
 
         RunTaskRequest request = RunTaskRequest.builder()
                 .cluster("outstanding-gecko-uvkkj2")
-                .taskDefinition("BuildBoxDeploy:1")
+                .taskDefinition("BuildBoxDeploy:2")
                 .launchType(LaunchType.FARGATE)
                 .networkConfiguration(networkConfiguration)
         .overrides(TaskOverride.builder()
@@ -49,7 +49,32 @@ public class ECSService {
                 .build())
                 .build();
 
-        ecsClient.runTask(request);
+        RunTaskResponse response = ecsClient.runTask(request);
+
+        String taskArn = response.tasks().get(0).taskArn();
+        return taskArn.substring(taskArn.lastIndexOf("/") + 1);
+    }
+
+    public String getTaskStatus(String taskId) {
+        DescribeTasksRequest describeRequest = DescribeTasksRequest.builder()
+                .cluster("outstanding-gecko-uvkkj2")
+                .tasks(taskId)
+                .build();
+
+        DescribeTasksResponse response = ecsClient.describeTasks(describeRequest);
+
+        if (response.tasks().isEmpty()) return "NOT_FOUND";
+
+        Task task = response.tasks().get(0);
+        String lastStatus = task.lastStatus(); // PROVISIONING, RUNNING, STOPPED
+
+        if ("STOPPED".equals(lastStatus)) {
+            // Check the exit code of the first container
+            Integer exitCode = task.containers().get(0).exitCode();
+            return (exitCode != null && exitCode == 0) ? "SUCCESS" : "FAILED";
+        }
+
+        return lastStatus; // Still in progress
     }
 
 
