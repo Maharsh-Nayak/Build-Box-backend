@@ -98,6 +98,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         response.getWriter().write("""
             { "token": "%s" }
             """.formatted(token));
+        response.sendRedirect("/dashboard");
     }
 
 }

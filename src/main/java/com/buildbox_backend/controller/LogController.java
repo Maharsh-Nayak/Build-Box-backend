@@ -18,7 +18,6 @@ import java.util.List;
 @RequestMapping("/deploymentLogs")
 public class LogController {
 
-
     private final CloudWatchService cloudWatchService;
     private final ECSService ecsService;
 
@@ -28,16 +27,13 @@ public class LogController {
         this.ecsService = ecsService;
     }
 
-
     @GetMapping(value = "/{taskId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<DeploymentStatus> getLogEvents(@PathVariable String taskId){
+    public Flux<DeploymentStatus> getLogEvents(@PathVariable String taskId) {
 
-        System.out.println(taskId);
-
+        System.out.println("Streaming logs for task: " + taskId);
 
         String logGroup = "/ecs/BuildBoxDeploy";
         String logStream = "ecs/InitialDeploy/" + taskId;
-
 
         return Flux.interval(Duration.ofSeconds(2))
                 .map(tick -> {
@@ -48,5 +44,4 @@ public class LogController {
                 })
                 .takeUntil(dto -> List.of("SUCCESS", "FAILED").contains(dto.getStatus()));
     }
-    
 }
