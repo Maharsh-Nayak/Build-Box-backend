@@ -18,7 +18,6 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -53,12 +52,12 @@ public class AuthController {
         return "OK";
     }
 
-    @GetMapping("/auth/google")
+    @GetMapping("/oauth/google")
     public void googleLogin(HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/google");
     }
 
-    @GetMapping("/auth/github")
+    @GetMapping("/oauth/github")
     public void githubLogin(HttpServletResponse response) throws IOException {
         response.sendRedirect("/oauth2/authorization/github");
     }
