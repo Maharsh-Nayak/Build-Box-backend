@@ -1,6 +1,7 @@
 package com.buildbox_backend.service;
 
 import com.buildbox_backend.model.Deployment;
+import com.buildbox_backend.model.Project;
 import com.buildbox_backend.repository.DeploymentsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,11 +44,28 @@ public class DeployService {
         }
     }
 
-    public void saveProject(String userId, String projectName, String link) {
-        Deployment deployment = new Deployment();
-        deployment.setBranch("main");
-        deployment.setDeploymentUrl(link);
-        deployment.setCreatedAt(LocalDateTime.now());
-        // Note to self : The DB needs a few changes, will update it and complete this part
+    public boolean findByProjectId(Long projectId) {
+        return deploymentsRepository.existsByProjectId(projectId);
     }
+
+    public Deployment save(Long projectId, Project project) {
+
+        Deployment oldDeployment = deploymentsRepository.findByProjectId(projectId);
+
+        Deployment newDeployment = new Deployment();
+
+        if (oldDeployment != null) {
+            newDeployment.setVersion(oldDeployment.getVersion() + 1);
+            newDeployment.setDeploymentUrl(oldDeployment.getDeploymentUrl());
+            newDeployment.setProject(oldDeployment.getProject());
+        }else{
+            newDeployment.setProject(project);
+            newDeployment.setVersion(1);
+            newDeployment.setDeploymentUrl(project.getUser().getId() + "." + projectId + "." + "localhost");
+        }
+
+        newDeployment.setProject(project);
+        return deploymentsRepository.save(newDeployment);
+    }
+
 }

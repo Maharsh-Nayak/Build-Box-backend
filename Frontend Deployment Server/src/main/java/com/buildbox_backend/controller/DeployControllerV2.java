@@ -18,7 +18,6 @@ public class DeployControllerV2 {
 
     private ECSService ecsService;
 
-
     @Autowired
     public DeployControllerV2(ECSService ecsService) {
         this.ecsService = ecsService;
@@ -30,12 +29,15 @@ public class DeployControllerV2 {
 
         System.out.println(request.getUserId());
 
-        String taskId = ecsService.startBuild(request.getLink(), request.getProjectName(), request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory());
+        Map<String, String> Ids = ecsService.startBuild(request.getLink(), request.getProjectName(), request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory());
 
-        // Note to self : just sending that deployment has started. the flow will be that once it starts, user will be redirected to deployment page where they will be shown logs directly from ECS container which will be fetched from cloud watch.
+        String buildId = Ids.get("buildId");
+        String taskId = Ids.get("taskId");
+
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Deployment started",
-                "taskId", taskId
+                "taskId", taskId,
+                "buildId", buildId
         ));
     }
 }

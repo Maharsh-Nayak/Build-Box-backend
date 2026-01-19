@@ -28,7 +28,7 @@ app.use((req, res) => {
     const userId = parts[0];
     const projectName = parts[1];
 
-    const target = `${BASE_PATH}/${userId}/${projectName}`;
+    const target = `${BASE_PATH}/${userId}/${projectName}/Frontend/index.html`;
 
     console.log(`[PROXY] ${hostname}${req.url} → ${target}`);
 

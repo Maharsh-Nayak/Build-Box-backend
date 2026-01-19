@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 
 public class AuthService {
@@ -32,6 +34,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setProvider("LOCAL");
         user.setEmailVerified(true);
+        user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
 

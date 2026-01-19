@@ -6,11 +6,12 @@ RUN apk add --no-cache \
     make \
     g++ \
     aws-cli \
-    docker-cli
+    docker-cli \
+    redis
 
 WORKDIR /app
 
-COPY ../scripts/build.sh /build.sh
+COPY build.sh /build.sh
 RUN chmod +x /build.sh && sed -i 's/\r$//' /build.sh
 
 ENTRYPOINT ["/build.sh"]

@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="minor changes">
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/build.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/BuildBoxBackendApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/AwsLogConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/EcsConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/S3Config.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/SecurityConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/AuthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/DeployController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/GitCloneController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/HealthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/LogController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/UploadController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/UserController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/AuthResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/DeploymentStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/GitCloneRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/SignupRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Activity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/BuildLog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Deployment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Domain.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/EnvVariable.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Project.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Team.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/TeamMember.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/repository/DeploymentsRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/repository/UserRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/JwtAuthFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/OAuthSuccessHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/AuthService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/CloudWatchService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/DeployService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/ECSService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/GitCloneService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/UploadService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/db/migration/v1.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/buildbox_backend/BuildBoxBackendApplicationTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CompilerWorkspaceConfiguration">
+    <option name="MAKE_PROJECT_ON_SAVE" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Maharsh-Nayak&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Maharsh-Nayak/Build-Box-backend.git&quot;,
+    &quot;accountId&quot;: &quot;46d25413-69c9-480d-84d1-23ad2fe2ec09&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="Security Analysis" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="36yCNGhQWC7tG6OzyuBuQG3Yvv5" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Database Script.v1.sql.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.BuildBoxBackendApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "F:/Build Boc/BuildBox_backend/Frontend Deployment Server",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.file-colors",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ],
+    "RunConfigurationTargetLRU": [
+      "bbc7b431-6858-41f2-9f5d-59433acdc678/database/\"postgres\"/schema/\"public\""
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\Build Boc\BuildBox_backend\ECR images\build Image" />
+      <recent name="F:\Build Boc\BuildBox_backend\ECR images" />
+      <recent name="F:\Build Boc\BuildBox_backend\scripts" />
+      <recent name="F:\Build Boc\BuildBox_backend\docker" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.BuildBoxBackendApplication">
+    <configuration name="v1.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/src/main/resources/db/migration/v1.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="bbc7b431-6858-41f2-9f5d-59433acdc678" namespace="database/&quot;postgres&quot;/schema/&quot;public&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="BuildBoxBackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="BuildBox_backend" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.buildbox_backend.BuildBoxBackendApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Database Script.v1.sql" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-84258761d1cc-intellij.indexing.shared.core-IU-243.28141.18" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.28141.18" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="" />
+      <created>1765969384550</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1765969384550</updated>
+      <workItem from="1765969385673" duration="9738000" />
+      <workItem from="1765979894945" duration="2898000" />
+      <workItem from="1765991504039" duration="2632000" />
+      <workItem from="1766167375261" duration="1316000" />
+      <workItem from="1766344088735" duration="598000" />
+      <workItem from="1766409909720" duration="1690000" />
+      <workItem from="1766424459277" duration="80000" />
+      <workItem from="1766636310733" duration="5506000" />
+      <workItem from="1766665914175" duration="2950000" />
+      <workItem from="1766669647834" duration="1957000" />
+      <workItem from="1766727248038" duration="73000" />
+      <workItem from="1766728157712" duration="28000" />
+      <workItem from="1766805658543" duration="4156000" />
+      <workItem from="1767499451371" duration="35000" />
+      <workItem from="1767804256916" duration="7406000" />
+      <workItem from="1767814850513" duration="1000" />
+      <workItem from="1767843606205" duration="3783000" />
+      <workItem from="1767847442979" duration="1207000" />
+      <workItem from="1767872067816" duration="7314000" />
+      <workItem from="1767890197675" duration="1530000" />
+      <workItem from="1767958108800" duration="15184000" />
+      <workItem from="1768015112663" duration="638000" />
+      <workItem from="1768239081135" duration="2976000" />
+      <workItem from="1768277243080" duration="310000" />
+      <workItem from="1768277619034" duration="624000" />
+      <workItem from="1768542459391" duration="107000" />
+      <workItem from="1768627880087" duration="2340000" />
+      <workItem from="1768672053019" duration="1209000" />
+      <workItem from="1768710802372" duration="7021000" />
+      <workItem from="1768827043502" duration="285000" />
+    </task>
+    <task id="LOCAL-00001" summary="Project Initialization">
+      <option name="closed" value="true" />
+      <created>1765969453092</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1765969453092</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Dependency resolved">
+      <option name="closed" value="true" />
+      <created>1765971293008</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1765971293008</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Added fucntionality to clone project and build it">
+      <option name="closed" value="true" />
+      <created>1765978197555</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765978197555</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Implemented S3 upload service">
+      <option name="closed" value="true" />
+      <created>1765992357431</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1765992357431</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Corrected the build process">
+      <option name="closed" value="true" />
+      <created>1765994577889</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1765994577889</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Implemented env var for variables">
+      <option name="closed" value="true" />
+      <created>1766168424387</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1766168424387</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Implemented env var for variables">
+      <option name="closed" value="true" />
+      <created>1766168595970</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1766168595970</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Implemented env var for variables">
+      <option name="closed" value="true" />
+      <created>1766642190177</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1766642190177</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Changed deployment architecture">
+      <option name="closed" value="true" />
+      <created>1767958251037</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1767958251037</updated>
+    </task>
+    <task id="LOCAL-00010" summary="implemented logs feature">
+      <option name="closed" value="true" />
+      <created>1767976838306</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1767976838306</updated>
+    </task>
+    <task id="LOCAL-00011" summary="minor changes">
+      <option name="closed" value="true" />
+      <created>1767981091871</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1767981091871</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Project Initialization" />
+    <MESSAGE value="Dependency resolved" />
+    <MESSAGE value="Added fucntionality to clone project and build it" />
+    <MESSAGE value="Implemented S3 upload service" />
+    <MESSAGE value="Corrected the build process" />
+    <MESSAGE value="Implemented env var for variables" />
+    <MESSAGE value="Changed deployment architecture" />
+    <MESSAGE value="implemented logs feature" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
