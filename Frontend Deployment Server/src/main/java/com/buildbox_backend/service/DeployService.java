@@ -1,20 +1,15 @@
 package com.buildbox_backend.service;
 
-import com.buildbox_backend.model.Deployment;
-import com.buildbox_backend.model.Project;
-import com.buildbox_backend.repository.DeploymentsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Service
 public class DeployService {
 
-    @Autowired
-    private DeploymentsRepository deploymentsRepository;
+//    @Autowired
+//    private DeploymentsRepository deploymentsRepository;
 
     public void buildProject(File projectDir) {
         String npmCommand = System.getProperty("os.name").toLowerCase().contains("win")
@@ -44,28 +39,28 @@ public class DeployService {
         }
     }
 
-    public boolean findByProjectId(Long projectId) {
-        return deploymentsRepository.existsByProjectId(projectId);
-    }
+//    public boolean findByProjectId(Long projectId) {
+//        return deploymentsRepository.existsByProjectId(projectId);
+//    }
 
-    public Deployment save(Long projectId, Project project) {
-
-        Deployment oldDeployment = deploymentsRepository.findByProjectId(projectId);
-
-        Deployment newDeployment = new Deployment();
-
-        if (oldDeployment != null) {
-            newDeployment.setVersion(oldDeployment.getVersion() + 1);
-            newDeployment.setDeploymentUrl(oldDeployment.getDeploymentUrl());
-            newDeployment.setProject(oldDeployment.getProject());
-        }else{
-            newDeployment.setProject(project);
-            newDeployment.setVersion(1);
-            newDeployment.setDeploymentUrl(project.getUser().getId() + "." + projectId + "." + "localhost");
-        }
-
-        newDeployment.setProject(project);
-        return deploymentsRepository.save(newDeployment);
-    }
+//    public Deployment save(Long projectId, Project project) {
+//
+//        Deployment oldDeployment = deploymentsRepository.findByProjectId(projectId);
+//
+//        Deployment newDeployment = new Deployment();
+//
+//        if (oldDeployment != null) {
+//            newDeployment.setVersion(oldDeployment.getVersion() + 1);
+//            newDeployment.setDeploymentUrl(oldDeployment.getDeploymentUrl());
+//            newDeployment.setProject(oldDeployment.getProject());
+//        }else{
+//            newDeployment.setProject(project);
+//            newDeployment.setVersion(1);
+//            newDeployment.setDeploymentUrl(project.getUser().getId() + "." + projectId + "." + "localhost");
+//        }
+//
+//        newDeployment.setProject(project);
+//        return deploymentsRepository.save(newDeployment);
+//    }
 
 }

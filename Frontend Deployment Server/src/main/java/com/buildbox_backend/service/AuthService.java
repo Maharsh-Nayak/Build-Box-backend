@@ -32,7 +32,7 @@ public class AuthService {
         user.setName(name);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
-        user.setProvider("LOCAL");
+//        user.setProvider("LOCAL");
         user.setEmailVerified(true);
         user.setCreatedAt(LocalDateTime.now());
 

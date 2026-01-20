@@ -69,10 +69,10 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                         changed = true;
                     }
 
-                    if (!finalProvider.equals(existing.getProvider())) {
-                        existing.setProvider(finalProvider);
-                        changed = true;
-                    }
+//                    if (!finalProvider.equals(existing.getProvider())) {
+//                        existing.setProvider(finalProvider);
+//                        changed = true;
+//                    }
 
                     if (changed) {
                         return userRepository.save(existing);
@@ -85,8 +85,8 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                     newUser.setEmail(finalEmail);
                     newUser.setName(finalName);
                     newUser.setAvatarUrl(finalAvatar);
-                    newUser.setProvider(finalProvider);
-                    newUser.setProviderId(finalProviderId);
+//                    newUser.setProvider(finalProvider);
+//                    newUser.setProviderId(finalProviderId);
                     newUser.setEmailVerified(true);
                     return userRepository.save(newUser);
                 });

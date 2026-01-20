@@ -51,7 +51,7 @@ public class ECSService {
 
         RunTaskRequest request = RunTaskRequest.builder()
                 .cluster("outstanding-gecko-uvkkj2")
-                .taskDefinition("BuildBoxDeploy:3")
+                .taskDefinition("BuildBoxDeploy:9")
                 .launchType(LaunchType.FARGATE)
                 .networkConfiguration(networkConfiguration)
         .overrides(TaskOverride.builder()
