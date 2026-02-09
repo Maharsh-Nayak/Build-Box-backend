@@ -1,0 +1,31 @@
+{
+    "family": "user-node-task",
+    "networkMode": "bridge",
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "containerDefinitions": [
+        {
+            "name": "user-node-app",
+            "image": "788184849410.dkr.ecr.ap-south-1.amazonaws.com/buildbox/buildserver:demo-node-app",
+            "memory": 256,
+            "cpu": 128,
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 0,
+                    "protocol": "tcp"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/user-node-app",
+                    "awslogs-region": "ap-south-1",
+                    "awslogs-stream-prefix": "demo-node-app"
+                }
+            }
+        }
+    ]
+}

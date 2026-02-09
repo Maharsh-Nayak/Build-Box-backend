@@ -26,13 +26,12 @@ public class EcsService {
                 DescribeTasksRequest.builder()
                         .cluster(cluster)
                         .tasks(taskArn)
-                        .build()
-        );
-        
+                        .build());
+
         if (taskResp.tasks().isEmpty()) {
-             throw new RuntimeException("Task not found: " + taskArn);
+            throw new RuntimeException("Task not found: " + taskArn);
         }
-        
+
         String containerInstanceArn = taskResp.tasks().get(0).containerInstanceArn();
         if (containerInstanceArn == null) {
             throw new RuntimeException("Task is not running on an EC2 instance (Fargate?)");
@@ -43,64 +42,63 @@ public class EcsService {
                 DescribeContainerInstancesRequest.builder()
                         .cluster(cluster)
                         .containerInstances(containerInstanceArn)
-                        .build()
-        );
-        
+                        .build());
+
         if (ciResp.containerInstances().isEmpty()) {
             throw new RuntimeException("Container instance not found: " + containerInstanceArn);
         }
-        
+
         String ec2InstanceId = ciResp.containerInstances().get(0).ec2InstanceId();
 
         // 3. Get EC2 Instance details -> Public IP
         DescribeInstancesResponse ec2Resp = ec2.describeInstances(
                 DescribeInstancesRequest.builder()
                         .instanceIds(ec2InstanceId)
-                        .build()
-        );
-        
+                        .build());
+
         for (Reservation res : ec2Resp.reservations()) {
             for (Instance inst : res.instances()) {
-                if (inst.publicIpAddress() != null) return inst.publicIpAddress();
-                if (inst.privateIpAddress() != null) return inst.privateIpAddress();
+                if (inst.publicIpAddress() != null)
+                    return inst.publicIpAddress();
+                if (inst.privateIpAddress() != null)
+                    return inst.privateIpAddress();
             }
         }
-        
+
         return "unknown"; // Should not happen
     }
 
     // ... runTask ... getAssignedPort ... isTaskRunning ... stopTask methods ...
-
 
     /**
      * Run an ECS task using EC2 launch type with image override.
      * Uses pre-registered task definitions (user-node-task or user-python-task)
      * and overrides the container image at runtime.
      *
-     * @param cluster ECS cluster name
-     * @param taskFamily Task definition family (e.g., "user-node-task")
-     * @param imageUri User's ECR image URI
+     * @param cluster       ECS cluster name
+     * @param taskFamily    Task definition family (e.g., "user-node-task")
+     * @param imageUri      User's ECR image URI
      * @param containerName Container name from task definition
-     * @param projectId Project identifier for tracking
+     * @param projectId     Project identifier for tracking
      * @return Task ARN of the started task
      */
     public String runTask(String cluster,
-                          String taskFamily,
-                          String imageUri,
-                          String containerName,
-                          String projectId) {
+            String taskFamily,
+            String imageUri,
+            String containerName,
+            String projectId) {
 
         // Note: AWS ECS ContainerOverride does NOT support changing the image.
         // We must register a new task definition revision with the user's image.
-        
+
         String taskDefArn = registerTaskDefinition(taskFamily, containerName, imageUri, projectId);
-        
+
         // Run task with EC2 launch type using new task definition
         RunTaskRequest request = RunTaskRequest.builder()
                 .cluster(cluster)
-                .taskDefinition(taskDefArn)  // Use newly registered task def
-                .launchType(LaunchType.EC2)  // ✅ EC2 launch type
-                .startedBy("buildserver-" + projectId)  // For tracking
+                .taskDefinition(taskDefArn) // Use newly registered task def
+                .launchType(LaunchType.EC2) // ✅ EC2 launch type
+                .startedBy("buildserver-" + projectId) // For tracking
                 .build();
 
         RunTaskResponse response = ecs.runTask(request);
@@ -122,21 +120,41 @@ public class EcsService {
     }
 
     /**
+     * Stop a running ECS task.
+     * 
+     * @param cluster ECS cluster name
+     * @param taskArn ARN of the task to stop
+     * @param reason  Reason for stopping the task
+     */
+    public void stopTask(String cluster, String taskArn, String reason) {
+        System.out.println("🛑 Stopping task: " + taskArn);
+
+        StopTaskRequest request = StopTaskRequest.builder()
+                .cluster(cluster)
+                .task(taskArn)
+                .reason(reason != null ? reason : "Stopped via BuildBox API")
+                .build();
+
+        ecs.stopTask(request);
+        System.out.println("✅ Task stop initiated: " + taskArn);
+    }
+
+    /**
      * Register a new task definition revision with the user's image.
      * This is required because ContainerOverride does not support changing images.
      */
     private String registerTaskDefinition(String family, String containerName, String imageUri, String projectId) {
-        
+
         // Define the container with the user's image
         ContainerDefinition container = ContainerDefinition.builder()
                 .name(containerName)
                 .image(imageUri)
-                .memory(256)  // 256 MB
-                .cpu(128)     // 0.125 vCPU
+                .memory(256) // 256 MB
+                .cpu(128) // 0.125 vCPU
                 .essential(true)
                 .portMappings(PortMapping.builder()
-                        .containerPort(containerName.contains("node") ? 3000 : 8000)
-                        .hostPort(0)  // Dynamic port mapping for bridge mode
+                        .containerPort(containerName.contains("node") ? 3000 : 5000) // Node=3000, Python=5000
+                        .hostPort(0) // Dynamic port mapping for bridge mode
                         .protocol(TransportProtocol.TCP)
                         .build())
                 .logConfiguration(LogConfiguration.builder()
@@ -144,8 +162,7 @@ public class EcsService {
                         .options(java.util.Map.of(
                                 "awslogs-group", "/ecs/" + containerName,
                                 "awslogs-region", "ap-south-1",
-                                "awslogs-stream-prefix", projectId
-                        ))
+                                "awslogs-stream-prefix", projectId))
                         .build())
                 .build();
 
@@ -158,7 +175,7 @@ public class EcsService {
 
         RegisterTaskDefinitionResponse response = ecs.registerTaskDefinition(request);
         String taskDefArn = response.taskDefinition().taskDefinitionArn();
-        
+
         System.out.println("📋 Registered task definition: " + taskDefArn);
         return taskDefArn;
     }
@@ -167,8 +184,8 @@ public class EcsService {
      * Get the dynamically assigned port for a running task.
      * Bridge mode assigns dynamic port mappings (hostPort: 0 → actual port).
      *
-     * @param cluster ECS cluster name
-     * @param taskArn Task ARN
+     * @param cluster       ECS cluster name
+     * @param taskArn       Task ARN
      * @param containerName Container name to find port for
      * @return Assigned host port (e.g., 32768)
      */
@@ -178,8 +195,7 @@ public class EcsService {
                 DescribeTasksRequest.builder()
                         .cluster(cluster)
                         .tasks(taskArn)
-                        .build()
-        );
+                        .build());
 
         if (response.tasks().isEmpty()) {
             throw new RuntimeException("Task not found: " + taskArn);
@@ -216,8 +232,7 @@ public class EcsService {
                 DescribeTasksRequest.builder()
                         .cluster(cluster)
                         .tasks(taskArn)
-                        .build()
-        );
+                        .build());
 
         if (response.tasks().isEmpty()) {
             return false;
@@ -225,21 +240,5 @@ public class EcsService {
 
         String status = response.tasks().get(0).lastStatus();
         return "RUNNING".equals(status);
-    }
-
-    /**
-     * Stop a running task.
-     */
-    public void stopTask(String cluster, String taskArn, String reason) {
-
-        ecs.stopTask(
-                StopTaskRequest.builder()
-                        .cluster(cluster)
-                        .task(taskArn)
-                        .reason(reason)
-                        .build()
-        );
-
-        System.out.println("🛑 Task stopped: " + taskArn);
     }
 }

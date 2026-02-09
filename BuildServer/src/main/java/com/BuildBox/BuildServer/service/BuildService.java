@@ -8,15 +8,17 @@ import com.BuildBox.BuildServer.service.TaskPortDiscoveryService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class BuildService {
 
-    @Value("${build.base.dir:C:/Users/Kavya/OneDrive/Desktop/BuildServer}")
+    @Value("${build.base.dir:/tmp/builds}")
     private String BASE_DIR;
 
-    @Value("${build.dockerfiles.dir:C:/Users/Kavya/OneDrive/Desktop/BuildServer/dockerfiles}")
+    @Value("${build.dockerfiles.dir:/tmp/dockerfiles}")
     private String DOCKERFILES_DIR;
 
     @Value("${s3.bucket.name:backend-artifacts}")
@@ -24,6 +26,12 @@ public class BuildService {
 
     @Value("${ecs.cluster.name:buildserver-cluster-1}")
     private String CLUSTER;
+
+    @Value("${ecr.registry.uri:}")
+    private String ECR_REGISTRY_URI;
+
+    @Value("${ecr.repository.name:buildbox/buildserver}")
+    private String ECR_REPOSITORY_NAME;
 
     private final S3Downloader s3;
     private final EcrService ecr;
@@ -52,46 +60,84 @@ public class BuildService {
      */
     public String buildAndRun(String projectId, String runtime) throws Exception {
 
-        Path projectDir = Path.of(BASE_DIR, "downloads", projectId);
+        Path projectDir = Path.of(BASE_DIR, projectId);
 
         // 1. Download code from S3
         System.out.println("📥 Downloading source code from S3...");
         s3.downloadDirectory(BUCKET, projectId + "/", projectDir);
 
-        // 2. Inject appropriate Dockerfile
-        String dockerfileName = runtime.equals("node") ? "node.dockerfile" : "python.dockerfile";
-        System.out.println("📝 Injecting Dockerfile: " + dockerfileName);
-        
-        commandRunner.run(
-                "copy \"" + DOCKERFILES_DIR + "\\" + dockerfileName + "\" \"" + projectDir + "\\Dockerfile\""
-        );
+        return buildFromDirectory(projectId, runtime, projectDir);
+    }
 
-        // 3. Build Docker image
+    /**
+     * Build from LOCAL code (skips S3 download) - for testing.
+     * Assumes code already exists at {projectId}/ directory under builds.
+     */
+    public String buildAndRunLocal(String projectId, String runtime) throws Exception {
+
+        Path projectDir = Path.of(BASE_DIR, projectId);
+
+        if (!Files.exists(projectDir)) {
+            throw new RuntimeException("Project directory not found: " + projectDir);
+        }
+
+        System.out.println("📂 Using LOCAL source code at: " + projectDir);
+
+        return buildFromDirectory(projectId, runtime, projectDir);
+    }
+
+    /**
+     * Core build logic - shared by both S3 and local builds.
+     */
+    private String buildFromDirectory(String projectId, String runtime, Path projectDir) throws Exception {
+        
+        // 1. Copy appropriate Dockerfile to project directory
+        String dockerfileName = runtime.equals("node") ? "node.dockerfile" : "python.dockerfile";
+        Path dockerfileSource = Path.of(DOCKERFILES_DIR, dockerfileName);
+        Path dockerfileTarget = projectDir.resolve("Dockerfile");
+        
+        System.out.println("📝 Injecting Dockerfile: " + dockerfileName);
+        Files.copy(dockerfileSource, dockerfileTarget, StandardCopyOption.REPLACE_EXISTING);
+
+        // 2. Build Docker image with linux/amd64 platform (CRITICAL for Mac → EC2)
         String imageTag = projectId + ":latest";
         System.out.println("🔨 Building Docker image: " + imageTag);
-        commandRunner.run("docker build -t " + imageTag + " \"" + projectDir + "\"");
+        System.out.println("   Platform: linux/amd64 (for EC2 compatibility)");
+        
+        String buildCommand = String.format(
+            "docker build --platform linux/amd64 -t %s \"%s\"",
+            imageTag,
+            projectDir.toAbsolutePath()
+        );
+        commandRunner.run(buildCommand);
 
-        // 4. Push to ECR
-        System.out.println("☁️ Pushing to ECR...");
-        String repoUri = ecr.ensureRepository(projectId);
+        // 3. Login to ECR
+        System.out.println("🔐 Authenticating with ECR...");
         dockerLogin.login();
 
-        commandRunner.run("docker tag " + imageTag + " " + repoUri + ":latest");
-        commandRunner.run("docker push " + repoUri + ":latest");
+        // 4. Tag and push to ECR
+        // Use the shared ECR repository with image tag for each project
+        String ecrImageUri = ECR_REGISTRY_URI + "/" + ECR_REPOSITORY_NAME + ":" + projectId;
+        
+        System.out.println("☁️ Pushing to ECR...");
+        System.out.println("   Image: " + ecrImageUri);
+        
+        commandRunner.run("docker tag " + imageTag + " " + ecrImageUri);
+        commandRunner.run("docker push " + ecrImageUri);
 
-        // 5. Run ECS task with image override
+        // 5. Run ECS task (registers new task definition with the image)
         String taskFamily = runtime.equals("node") ? "user-node-task" : "user-python-task";
         String containerName = runtime.equals("node") ? "user-node-app" : "user-python-app";
 
         System.out.println("🚀 Starting ECS task...");
         System.out.println("   Task Family: " + taskFamily);
         System.out.println("   Container: " + containerName);
-        System.out.println("   Image: " + repoUri + ":latest");
+        System.out.println("   Image: " + ecrImageUri);
 
         String taskArn = ecs.runTask(
                 CLUSTER,
                 taskFamily,
-                repoUri + ":latest",
+                ecrImageUri,
                 containerName,
                 projectId
         );
@@ -99,71 +145,6 @@ public class BuildService {
         System.out.println("✅ Task started: " + taskArn);
         
         // 6. Wait for task to be RUNNING and discover port
-        // Note: This blocks the async thread, which is fine.
-        discoveryService.discoverAndRegister(
-                CLUSTER,
-                taskArn,
-                projectId,
-                runtime,
-                containerName
-        );
-
-        System.out.println("✅ Build and deployment complete!");
-
-        return taskArn;
-    }
-
-    /**
-     * Build from LOCAL code (skips S3 download) - for testing.
-     * Assumes code already exists at downloads/{projectId}/
-     */
-    public String buildAndRunLocal(String projectId, String runtime) throws Exception {
-
-        Path projectDir = Path.of(BASE_DIR, "downloads", projectId);
-
-        System.out.println("📂 Using LOCAL source code at: " + projectDir);
-
-        // 1. Inject appropriate Dockerfile
-        String dockerfileName = runtime.equals("node") ? "node.dockerfile" : "python.dockerfile";
-        System.out.println("📝 Injecting Dockerfile: " + dockerfileName);
-        
-        commandRunner.run(
-                "copy \"" + DOCKERFILES_DIR + "\\" + dockerfileName + "\" \"" + projectDir + "\\Dockerfile\""
-        );
-
-        // 2. Build Docker image
-        String imageTag = projectId + ":latest";
-        System.out.println("🔨 Building Docker image: " + imageTag);
-        commandRunner.run("docker build -t " + imageTag + " \"" + projectDir + "\"");
-
-        // 3. Push to ECR
-        System.out.println("☁️ Pushing to ECR...");
-        String repoUri = ecr.ensureRepository(projectId);
-        dockerLogin.login();
-
-        commandRunner.run("docker tag " + imageTag + " " + repoUri + ":latest");
-        commandRunner.run("docker push " + repoUri + ":latest");
-
-        // 4. Run ECS task
-        String taskFamily = runtime.equals("node") ? "user-node-task" : "user-python-task";
-        String containerName = runtime.equals("node") ? "user-node-app" : "user-python-app";
-
-        System.out.println("🚀 Starting ECS task...");
-        System.out.println("   Task Family: " + taskFamily);
-        System.out.println("   Container: " + containerName);
-        System.out.println("   Image: " + repoUri + ":latest");
-
-        String taskArn = ecs.runTask(
-                CLUSTER,
-                taskFamily,
-                repoUri + ":latest",
-                containerName,
-                projectId
-        );
-        
-        System.out.println("✅ Task started: " + taskArn);
-        
-        // 5. Wait for task to be RUNNING and discover port
         discoveryService.discoverAndRegister(
                 CLUSTER,
                 taskArn,

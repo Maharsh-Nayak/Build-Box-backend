@@ -1,0 +1,12 @@
+{
+  "name": "demo-node-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js app for ECS deployment demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
