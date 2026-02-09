@@ -1,0 +1,37 @@
+{
+  "family": "buildserver-task",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "256",
+  "memory": "512",
+  "taskRoleArn": "arn:aws:iam::788184849410:role/buildserverrole",
+
+  "executionRoleArn": "arn:aws:iam::788184849410:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "buildserver",
+      "image": "788184849410.dkr.ecr.ap-south-1.amazonaws.com/buildbox/buildserver:latest",
+      "memory": 512,
+      "memoryReservation": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "SPRING_PROFILES_ACTIVE", "value": "prod" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/buildserver",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

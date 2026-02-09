@@ -5,59 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="minor changes">
-      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-reverse-proxy/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/build.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/BuildBoxBackendApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/AwsLogConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/EcsConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/S3Config.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/config/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/AuthController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/DeployController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/GitCloneController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/HealthController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/LogController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/UploadController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/controller/UserController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/AuthResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/DeploymentStatus.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/GitCloneRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/LoginRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/dto/SignupRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Activity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/BuildLog.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Deployment.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Domain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/EnvVariable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Project.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/Team.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/TeamMember.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/model/User.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/repository/DeploymentsRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/repository/UserRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/JwtAuthFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/JwtService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/security/OAuthSuccessHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/AuthService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/CloudWatchService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/DeployService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/ECSService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/GitCloneService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/buildbox_backend/service/UploadService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/db/migration/v1.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/buildbox_backend/BuildBoxBackendApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +56,6 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="36yCNGhQWC7tG6OzyuBuQG3Yvv5" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -116,16 +63,18 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Database Script.v1.sql.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Spring Boot.BuildBoxBackendApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "F:/Build Boc/BuildBox_backend/Frontend Deployment Server",
+    "last_opened_file_path": "/Users/kavyapatel/Desktop/buildbox/Build-Box-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -175,8 +124,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-84258761d1cc-intellij.indexing.shared.core-IU-243.28141.18" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.28141.18" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
       </set>
     </attachedChunks>
   </component>
@@ -218,6 +166,7 @@
       <workItem from="1768672053019" duration="1209000" />
       <workItem from="1768710802372" duration="7021000" />
       <workItem from="1768827043502" duration="285000" />
+      <workItem from="1770634573717" duration="405000" />
     </task>
     <task id="LOCAL-00001" summary="Project Initialization">
       <option name="closed" value="true" />

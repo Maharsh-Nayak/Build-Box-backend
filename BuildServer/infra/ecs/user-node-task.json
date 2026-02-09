@@ -1,0 +1,39 @@
+{
+  "family": "user-node-task",
+  "networkMode": "bridge",
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "128",
+  "memory": "256",
+
+  "containerDefinitions": [
+    {
+      "name": "user-node-app",
+      "image": "node:18-alpine",
+      "essential": true,
+
+      "memory": 256,
+      "memoryReservation": 128,
+
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ],
+
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" }
+      ],
+
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/user-node-app",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
