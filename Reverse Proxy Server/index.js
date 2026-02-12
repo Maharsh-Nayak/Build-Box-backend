@@ -4,9 +4,9 @@ const httpProxy = require('http-proxy');
 const app = express();
 const PORT = 8000;
 
-// S3 base path
+// CloudFront base path
 const BASE_PATH =
-  'https://buildbox-frontend.s3.ap-south-1.amazonaws.com/';
+  'dyra0rwu5pit6.cloudfront.net';
 
 // Create proxy
 const proxy = httpProxy.createProxyServer({
@@ -28,7 +28,7 @@ app.use((req, res) => {
     const userId = parts[0];
     const projectName = parts[1];
 
-    const target = `${BASE_PATH}/${userId}/${projectName}/Frontend/index.html`;
+    const target = `https://${BASE_PATH}/${userId}/${projectName}/Frontend`;
 
     console.log(`[PROXY] ${hostname}${req.url} → ${target}`);
 
