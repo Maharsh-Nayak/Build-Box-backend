@@ -1,8 +1,7 @@
 package com.log_analytics_server.Controller;
 
+import com.log_analytics_server.Service.BuildLogsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -13,44 +12,32 @@ import reactor.core.publisher.Flux;
 @CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*", allowCredentials = "true")
 public class LogControllerV2 {
 
-    private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
-
     @Autowired
-    public LogControllerV2(ReactiveRedisTemplate<String, String> reactiveRedisTemplate) {
-        this.reactiveRedisTemplate = reactiveRedisTemplate;
-    }
+    private BuildLogsService logService;
 
-    @GetMapping(value = "/{buildId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> getBuildLogs(@PathVariable String buildId) {
-        String key = "logs:"+buildId;
+    @GetMapping(value = "/{id}/logs",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> streamLogs(
+            @PathVariable("id") String buildId,
+            @RequestHeader(value = "Last-Event-ID", required = false)
+            String lastEventId
+    ) {
 
-        System.out.println(key);
+        System.out.println(buildId);
+        System.out.println(lastEventId);
 
-        return reactiveRedisTemplate.opsForStream()
-                .read(StreamOffset.fromStart(key))
-                .map(record -> {
+                return logService.streamLogs(buildId, lastEventId)
+                                .map(record -> {
 
-                    System.out.println(record);
-
-                    String logLine = record.getValue().get("log").toString();
-                    String status = "IN_PROGRESS";
-
-                    if (logLine.contains("__BUILD_STATUS__:SUCCESS"))
-                        status = "SUCCESS";
-
-                    if (logLine.contains("__BUILD_STATUS__:FAILED"))
-                        status = "FAILED";
-
-                    String json = String.format(
-                            "{\"logs\": [\"%s\"], \"status\": \"%s\"}",
-                            logLine.replace("\"", "\\\""),
-                            status
-                    );
-
-//                    System.out.println(json);
+                                        String message = record.getValue().getOrDefault("log", record.getValue().get("message"));
+                                        if (message == null) {
+                                                message = "";
+                                        }
 
                     return ServerSentEvent.<String>builder()
-                            .data(json)
+                            .id(record.getId().getValue())
+                            .event("log")
+                            .data(message)
                             .build();
                 });
     }

@@ -1,12 +1,16 @@
-#!/bin/sh
-
-set -o pipefail
+#!/bin/bash
+set -e
 
 CURRENT_STEP="INIT"
 
 push_to_redis() {
-  redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" -a "$REDIS_PASSWORD" \
-    XADD "logs:$BUILD_ID" * log "$1" > /dev/null 2>&1
+  redis-cli \
+    --tls \
+    --cacert /etc/ssl/certs/ca-certificates.crt \
+    -h "$REDIS_HOST" \
+    -p "$REDIS_PORT" \
+    -a "$REDIS_PASSWORD" \
+    XADD "logs:$BUILD_ID" * log "$1" > /dev/null 2>&1 || true
 }
 
 on_error() {
@@ -20,13 +24,24 @@ on_error() {
 
 trap on_error ERR
 
+push_step() {
+  # Escape double quotes to prevent syntax errors in redis-cli
+  SAFE_MSG=$(echo "$1" | sed 's/"/\\"/g')
+  redis-cli \
+    --tls \
+    --cacert /etc/ssl/certs/ca-certificates.crt \
+    -h "$REDIS_HOST" \
+    -p "$REDIS_PORT" \
+    -a "$REDIS_PASSWORD" \
+    XADD "logs:$BUILD_ID" * log "$SAFE_MSG" > /dev/null 2>&1 || true
+}
+
 step() {
   CURRENT_STEP="$1"
-  push_to_redis "➡️ STEP START: $1"
+  push_step "➡️ STEP START: $1"
 }
 
 main_build() {
-
   step "CLONE_REPO"
   git clone "$GIT_URL" repo
   cd repo
@@ -53,10 +68,17 @@ main_build() {
   aws s3 sync "$BACKEND_DIR"/ s3://buildbox-frontend/"$USER_ID"/"$PROJECT_NAME"/Backend --delete
 }
 
-main_build 2>&1 | while IFS= read -r line; do
-  echo "$line"
+main_build 2>&1 | tee /tmp/build.log
+
+# Redirect all output to console + file
+exec > >(tee /tmp/build.log) 2>&1
+
+main_build
+
+# Push logs line-by-line to Redis
+while IFS= read -r line; do
   push_to_redis "$line"
-done
+done < /tmp/build.log
 
 push_to_redis "✅ BUILD SUCCESS"
 push_to_redis "__BUILD_STATUS__:SUCCESS"

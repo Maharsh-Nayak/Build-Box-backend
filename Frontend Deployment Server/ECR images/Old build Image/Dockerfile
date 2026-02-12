@@ -1,6 +1,8 @@
 FROM node:20-alpine
 
 RUN apk add --no-cache \
+    bash \
+    ca-certificates \
     git \
     python3 \
     make \
@@ -14,4 +16,4 @@ WORKDIR /app
 COPY build.sh /build.sh
 RUN chmod +x /build.sh && sed -i 's/\r$//' /build.sh
 
-ENTRYPOINT ["/build.sh"]
+ENTRYPOINT ["bash", "/build.sh"]
