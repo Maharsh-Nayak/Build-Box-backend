@@ -1,6 +1,7 @@
 package com.BuildBox.BuildServer.service;
 
 import com.BuildBox.BuildServer.util.CommandRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -11,75 +12,36 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages Nginx reverse proxy routing for deployed applications.
- * Creates routes like: projectId.localhost:8080 → actualHost:dynamicPort
+ * Writes declarative configuration files to a system directory and signals
+ * Nginx to reload.
  */
 @Service
 public class NginxRoutingService {
 
-    private static final Path NGINX_CONF_DIR = Path.of("/tmp/nginx/conf.d");
-    private static final Path NGINX_CONTAINER_NAME = Path.of("buildbox-nginx");
+    @Value("${nginx.conf.path:/etc/nginx/sites-enabled}")
+    private String NGINX_CONF_DIR;
 
     private final CommandRunner commandRunner;
     private final ConcurrentHashMap<String, RouteInfo> activeRoutes = new ConcurrentHashMap<>();
 
     public NginxRoutingService(CommandRunner commandRunner) {
         this.commandRunner = commandRunner;
-        initNginx();
-        startNginxContainer();
     }
 
     /**
-     * Initialize Nginx Docker container if not running.
-     */
-    private void initNginx() {
-        try {
-            // Create config directory
-            Files.createDirectories(NGINX_CONF_DIR);
-
-            // Create main nginx.conf if it doesn't exist
-            Path mainConf = NGINX_CONF_DIR.getParent().resolve("nginx.conf");
-            if (!Files.exists(mainConf)) {
-                String defaultConf = """
-                        events {
-                            worker_connections 1024;
-                        }
-
-                        http {
-                            include /etc/nginx/conf.d/*.conf;
-
-                            # Default server
-                            server {
-                                listen 8080 default_server;
-                                server_name _;
-
-                                location / {
-                                    return 404 'No route configured for this host';
-                                }
-                            }
-                        }
-                        """;
-                Files.writeString(mainConf, defaultConf);
-            }
-
-            System.out.println("📦 Nginx routing service initialized");
-            System.out.println("   Config dir: " + NGINX_CONF_DIR);
-
-        } catch (IOException e) {
-            System.err.println("⚠️ Failed to initialize Nginx config directory: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Add a route for a project.
+     * Add or update a route for a project.
      * Creates: projectId.localhost → host:port
      */
     public void addRoute(String projectId, String host, int port) {
         try {
+            // Ensure directory exists (useful for local dev/testing)
+            Files.createDirectories(Path.of(NGINX_CONF_DIR));
+
             String serverName = projectId + ".localhost";
             String upstream = host + ":" + port;
 
             String config = String.format("""
-                    # Route for %s
+                    # Dynamic route for project: %s
                     server {
                         listen 8080;
                         server_name %s;
@@ -92,96 +54,68 @@ public class NginxRoutingService {
                             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                             proxy_set_header Upgrade $http_upgrade;
                             proxy_set_header Connection "upgrade";
+
+                            # Timeouts for cold starts / long running builds
+                            proxy_read_timeout 300;
+                            proxy_connect_timeout 300;
                         }
                     }
                     """, projectId, serverName, upstream);
 
-            Path confFile = NGINX_CONF_DIR.resolve(projectId + ".conf");
+            Path confFile = Path.of(NGINX_CONF_DIR, projectId + ".conf");
             Files.writeString(confFile, config, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
             activeRoutes.put(projectId, new RouteInfo(serverName, host, port, confFile.toString()));
 
-            // Reload Nginx
+            // Reload Nginx on host
             reloadNginx();
 
-            System.out.println("🔀 Route added: " + serverName + " → " + upstream);
+            System.out.println("🔀 Nginx route updated: " + serverName + " → " + upstream);
 
         } catch (IOException e) {
-            System.err.println("❌ Failed to add route for " + projectId + ": " + e.getMessage());
+            System.err.println("❌ Failed to create Nginx route for " + projectId + ": " + e.getMessage());
         }
     }
 
     /**
-     * Remove a route for a project.
+     * Remove a route for a project and update Nginx.
      */
     public void removeRoute(String projectId) {
         try {
-            Path confFile = NGINX_CONF_DIR.resolve(projectId + ".conf");
+            Path confFile = Path.of(NGINX_CONF_DIR, projectId + ".conf");
 
-            if (Files.exists(confFile)) {
-                Files.delete(confFile);
+            if (Files.deleteIfExists(confFile)) {
                 activeRoutes.remove(projectId);
-
-                // Reload Nginx
                 reloadNginx();
-
-                System.out.println("🔀 Route removed: " + projectId);
+                System.out.println("🔀 Nginx route removed: " + projectId);
             }
 
         } catch (IOException e) {
-            System.err.println("❌ Failed to remove route for " + projectId + ": " + e.getMessage());
+            System.err.println("❌ Failed to remove Nginx route for " + projectId + ": " + e.getMessage());
         }
     }
 
     /**
-     * Reload Nginx configuration.
+     * Sends reload signal to Nginx host process.
      */
     private void reloadNginx() {
         try {
-            // Check if container is running
-            commandRunner.run(
-                    "docker exec buildbox-nginx nginx -s reload 2>/dev/null || echo 'Nginx container not running - routes saved for next start'");
+            // Primary reload command for production systems
+            commandRunner.run("nginx -s reload");
         } catch (Exception e) {
-            System.out.println("⚠️ Nginx reload skipped (container may not be running)");
+            System.err.println("⚠️ Nginx reload signal failed. Ensure Nginx is installed on the host and running.");
         }
     }
 
-    /**
-     * Start Nginx container (call once during setup).
-     */
-    public void startNginxContainer() {
-        try {
-            String command = String.format(
-                    "docker run -d --name buildbox-nginx " +
-                            "-p 8080:8080 " +
-                            "-v %s:/etc/nginx/nginx.conf:ro " +
-                            "-v %s:/etc/nginx/conf.d:ro " +
-                            "nginx:alpine 2>/dev/null || docker start buildbox-nginx",
-                    NGINX_CONF_DIR.getParent().resolve("nginx.conf"),
-                    NGINX_CONF_DIR);
-            commandRunner.run(command);
-            System.out.println("✅ Nginx container started on port 8080");
-        } catch (Exception e) {
-            System.err.println("⚠️ Failed to start Nginx: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Get route URL for a project.
-     */
     public String getRouteUrl(String projectId) {
         RouteInfo info = activeRoutes.get(projectId);
         return info != null ? "http://" + info.serverName + ":8080" : null;
     }
 
-    /**
-     * Get all active routes.
-     */
     public ConcurrentHashMap<String, RouteInfo> getActiveRoutes() {
         return activeRoutes;
     }
 
-    // Route info record
     public record RouteInfo(String serverName, String targetHost, int targetPort, String configPath) {
     }
 }

@@ -12,8 +12,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class EcsService {
 
-    private final EcsClient ecs = EcsClient.create();
-    private final Ec2Client ec2 = Ec2Client.create();
+    private final EcsClient ecs;
+    private final Ec2Client ec2;
+
+    public EcsService(EcsClient ecs, Ec2Client ec2) {
+        this.ecs = ecs;
+        this.ec2 = ec2;
+    }
 
     // ... existing RunTask method ...
 
@@ -240,5 +245,22 @@ public class EcsService {
 
         String status = response.tasks().get(0).lastStatus();
         return "RUNNING".equals(status);
+    }
+
+    /**
+     * Get the current status of a task.
+     */
+    public String getTaskStatus(String cluster, String taskArn) {
+        DescribeTasksResponse response = ecs.describeTasks(
+                DescribeTasksRequest.builder()
+                        .cluster(cluster)
+                        .tasks(taskArn)
+                        .build());
+
+        if (response.tasks().isEmpty()) {
+            return "UNKNOWN";
+        }
+
+        return response.tasks().get(0).lastStatus();
     }
 }

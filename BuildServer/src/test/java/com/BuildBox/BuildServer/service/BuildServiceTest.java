@@ -57,9 +57,11 @@ class BuildServiceTest {
 
         when(ecr.ensureRepository(projectId)).thenReturn(repoUri);
         when(ecs.runTask(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(taskArn);
-        
-        TaskInfo mockTask = new TaskInfo(projectId, taskArn, runtime, "1.2.3.4", 8080, "RUNNING", Instant.now());
-        when(discoveryService.discoverAndRegister(anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(mockTask);
+
+        TaskInfo mockTask = new TaskInfo(projectId, taskArn, runtime, "1.2.3.4", 8080, "RUNNING", Instant.now(),
+                Instant.now());
+        when(discoveryService.discoverAndRegister(anyString(), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(mockTask);
 
         // Act
         String resultArn = buildService.buildAndRun(projectId, runtime);
@@ -73,7 +75,9 @@ class BuildServiceTest {
         verify(ecr).ensureRepository(projectId);
         verify(dockerLogin).login();
         verify(commandRunner, atLeastOnce()).run(contains("docker push"));
-        verify(ecs).runTask(eq("test-cluster"), eq("user-node-task"), eq(repoUri + ":latest"), eq("user-node-app"), eq(projectId));
-        verify(discoveryService).discoverAndRegister(eq("test-cluster"), eq(taskArn), eq(projectId), eq(runtime), eq("user-node-app"));
+        verify(ecs).runTask(eq("test-cluster"), eq("user-node-task"), eq(repoUri + ":latest"), eq("user-node-app"),
+                eq(projectId));
+        verify(discoveryService).discoverAndRegister(eq("test-cluster"), eq(taskArn), eq(projectId), eq(runtime),
+                eq("user-node-app"));
     }
 }

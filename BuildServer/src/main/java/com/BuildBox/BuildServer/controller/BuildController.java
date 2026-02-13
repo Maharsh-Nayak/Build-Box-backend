@@ -1,7 +1,7 @@
 package com.BuildBox.BuildServer.controller;
 
 import com.BuildBox.BuildServer.aws.EcsService;
-import com.BuildBox.BuildServer.aws.SecurityGroupService;
+import com.BuildBox.BuildServer.aws.CloudWatchLogsService;
 import com.BuildBox.BuildServer.dto.BuildRequest;
 import com.BuildBox.BuildServer.dto.BuildResponse;
 import com.BuildBox.BuildServer.model.TaskInfo;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/builds")
@@ -26,19 +27,19 @@ public class BuildController {
     private final AsyncBuildExecutor executor;
     private final TaskRegistry taskRegistry;
     private final EcsService ecsService;
-    private final SecurityGroupService securityGroupService;
     private final NginxRoutingService nginxRoutingService;
+    private final CloudWatchLogsService logsService;
 
     public BuildController(AsyncBuildExecutor executor,
             TaskRegistry taskRegistry,
             EcsService ecsService,
-            SecurityGroupService securityGroupService,
-            NginxRoutingService nginxRoutingService) {
+            NginxRoutingService nginxRoutingService,
+            CloudWatchLogsService logsService) {
         this.executor = executor;
         this.taskRegistry = taskRegistry;
         this.ecsService = ecsService;
-        this.securityGroupService = securityGroupService;
         this.nginxRoutingService = nginxRoutingService;
+        this.logsService = logsService;
     }
 
     @PostMapping
@@ -53,20 +54,28 @@ public class BuildController {
     }
 
     @GetMapping("/tasks/{projectId}")
-    public TaskInfo getTaskStatus(@PathVariable String projectId) {
+    public ResponseEntity<TaskInfo> getTaskStatus(@PathVariable String projectId) {
         TaskInfo task = taskRegistry.getTask(projectId);
         if (task == null) {
-            throw new RuntimeException("Task not found for project: " + projectId);
+            return ResponseEntity.notFound().build();
         }
-        return task;
+        return ResponseEntity.ok(task);
     }
 
-    /**
-     * Stop a running task and clean up resources.
-     * - Stops the ECS task
-     * - Closes the security group port
-     * - Removes from task registry
-     */
+    @GetMapping("/tasks/{projectId}/logs")
+    public ResponseEntity<List<String>> getTaskLogs(@PathVariable String projectId) {
+        TaskInfo task = taskRegistry.getTask(projectId);
+        if (task == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String logGroupName = task.runtime().contains("node") ? "/ecs/user-node-app" : "/ecs/user-python-app";
+        // Stream prefix is projectId
+        String logStreamName = "user-" + task.runtime() + "-app/" + projectId + "/" + task.taskArn().split("/")[2];
+
+        return ResponseEntity.ok(logsService.getLogs(logGroupName, logStreamName));
+    }
+
     @DeleteMapping("/tasks/{projectId}")
     public ResponseEntity<Map<String, String>> stopTask(@PathVariable String projectId) {
         TaskInfo task = taskRegistry.getTask(projectId);
@@ -77,19 +86,9 @@ public class BuildController {
 
         System.out.println("🛑 Stopping task for project: " + projectId);
 
-        // 1. Stop the ECS task
         ecsService.stopTask(cluster, task.taskArn(), "Stopped via API");
-
-        // 2. Close the security group port
-        securityGroupService.closePort(task.hostPort());
-
-        // 3. Remove Nginx route
         nginxRoutingService.removeRoute(projectId);
-
-        // 4. Remove from registry
         taskRegistry.removeTask(projectId);
-
-        System.out.println("✅ Task stopped and cleaned up: " + projectId);
 
         return ResponseEntity.ok(Map.of(
                 "projectId", projectId,
@@ -97,9 +96,6 @@ public class BuildController {
                 "message", "Task stopped, port closed, registry cleaned"));
     }
 
-    /**
-     * Test endpoint - uses LOCAL code instead of S3.
-     */
     @PostMapping("/test-local")
     public BuildResponse triggerLocalBuild(@Valid @RequestBody BuildRequest request) {
         executor.startBuildLocal(

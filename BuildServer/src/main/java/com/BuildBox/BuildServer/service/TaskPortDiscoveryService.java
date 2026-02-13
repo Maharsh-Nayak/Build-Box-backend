@@ -1,7 +1,6 @@
 package com.BuildBox.BuildServer.service;
 
 import com.BuildBox.BuildServer.aws.EcsService;
-import com.BuildBox.BuildServer.aws.SecurityGroupService;
 import com.BuildBox.BuildServer.model.TaskInfo;
 import org.springframework.stereotype.Service;
 
@@ -12,36 +11,35 @@ public class TaskPortDiscoveryService {
 
     private final EcsService ecsService;
     private final TaskRegistry taskRegistry;
-    private final SecurityGroupService securityGroupService;
     private final NginxRoutingService nginxRoutingService;
 
     public TaskPortDiscoveryService(EcsService ecsService,
             TaskRegistry taskRegistry,
-            SecurityGroupService securityGroupService,
             NginxRoutingService nginxRoutingService) {
         this.ecsService = ecsService;
         this.taskRegistry = taskRegistry;
-        this.securityGroupService = securityGroupService;
         this.nginxRoutingService = nginxRoutingService;
     }
 
     /**
      * Polls ECS for the task status until it is RUNNING, then:
      * 1. Discovers the dynamically assigned port
-     * 2. Opens the security group for that port
-     * 3. Adds an Nginx route for clean URL access
-     * 4. Registers the task in the registry
+     * 2. Adds an Nginx route for clean URL access
+     * 3. Registers the task in the registry
      */
     public TaskInfo discoverAndRegister(String cluster, String taskArn, String projectId, String runtime,
             String containerName) {
         System.out.println("🔍 Waiting for task to start... (Task ARN: " + taskArn + ")");
 
         int attempts = 0;
-        int maxAttempts = 20; // 20 * 2s = 40 seconds timeout
+        int maxAttempts = 90; // 90 * 2s = 3 minutes timeout
 
         while (attempts < maxAttempts) {
             try {
-                if (ecsService.isTaskRunning(cluster, taskArn)) {
+                String status = ecsService.getTaskStatus(cluster, taskArn);
+                System.out.println("   [Attempt " + (attempts + 1) + "] Task Status: " + status);
+
+                if ("RUNNING".equals(status)) {
                     System.out.println("✅ Task is RUNNING. Discovering port...");
 
                     Integer port = ecsService.getAssignedPort(cluster, taskArn, containerName);
@@ -51,10 +49,7 @@ public class TaskPortDiscoveryService {
                         System.out.println("✅ Port discovered: " + port);
                         System.out.println("✅ Host discovered: " + host);
 
-                        // AUTO 1: Open security group port for external access
-                        securityGroupService.openPort(port);
-
-                        // AUTO 2: Add Nginx route for clean URL access
+                        // AUTO: Add Nginx route for clean URL access
                         nginxRoutingService.addRoute(projectId, host, port);
 
                         // Register in task registry

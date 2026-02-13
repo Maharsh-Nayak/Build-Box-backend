@@ -93,3 +93,7 @@ coverage/
 # =========================
 *.tgz
 *.pid
+
+
+
+*.properties
