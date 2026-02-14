@@ -1,0 +1,21 @@
+spring.application.name=BuildBox_Frontend_Server
+server.port=9000
+
+# Database
+spring.datasource.url=jdbc:postgresql://YOUR_DB_HOST:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_DB_PASSWORD
+
+# Redis
+spring.data.redis.host=YOUR_REDIS_HOST
+spring.data.redis.port=12608
+spring.data.redis.password=YOUR_REDIS_PASSWORD
+
+# OAuth
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.github.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.github.client-secret=YOUR_CLIENT_SECRET
+
+# JWT
+jwt.secretkey=YOUR_JWT_SECRET

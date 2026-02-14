@@ -71,7 +71,19 @@
 
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>elasticloadbalancingv2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>ec2</artifactId>
+		</dependency>
+
+		<!-- Single HTTP client for all SDK clients: avoids NoClassDefFoundError for
+		     PoolingHttpClientConnectionManager / Netty at shutdown -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
 		</dependency>
 
 		<dependency>
@@ -97,6 +109,23 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- JPA + PostgreSQL for Deployment Tracking -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Flyway for Database Migration -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
 		</dependency>
 
 		<!-- JSON Serialization -->

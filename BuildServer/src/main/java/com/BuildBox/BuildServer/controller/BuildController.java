@@ -6,7 +6,7 @@ import com.BuildBox.BuildServer.dto.BuildRequest;
 import com.BuildBox.BuildServer.dto.BuildResponse;
 import com.BuildBox.BuildServer.model.TaskInfo;
 import com.BuildBox.BuildServer.service.AsyncBuildExecutor;
-import com.BuildBox.BuildServer.service.NginxRoutingService;
+import com.BuildBox.BuildServer.service.RoutingBackend;
 import com.BuildBox.BuildServer.service.TaskRegistry;
 
 import jakarta.validation.Valid;
@@ -27,26 +27,32 @@ public class BuildController {
     private final AsyncBuildExecutor executor;
     private final TaskRegistry taskRegistry;
     private final EcsService ecsService;
-    private final NginxRoutingService nginxRoutingService;
+    private final RoutingBackend routingBackend;
     private final CloudWatchLogsService logsService;
+
+    private final com.BuildBox.BuildServer.repository.ProjectRepository projectRepository;
 
     public BuildController(AsyncBuildExecutor executor,
             TaskRegistry taskRegistry,
             EcsService ecsService,
-            NginxRoutingService nginxRoutingService,
-            CloudWatchLogsService logsService) {
+            RoutingBackend routingBackend,
+            CloudWatchLogsService logsService,
+            com.BuildBox.BuildServer.repository.ProjectRepository projectRepository) {
         this.executor = executor;
         this.taskRegistry = taskRegistry;
         this.ecsService = ecsService;
-        this.nginxRoutingService = nginxRoutingService;
+        this.routingBackend = routingBackend;
         this.logsService = logsService;
+        this.projectRepository = projectRepository;
     }
 
     @PostMapping
     public BuildResponse triggerBuild(@Valid @RequestBody BuildRequest request) {
         executor.startBuild(
                 request.getProjectId(),
-                request.getRuntime());
+                request.getRuntime(),
+                request.getDeploymentId(),
+                request.getBasePath());
 
         return new BuildResponse(
                 request.getProjectId(),
@@ -87,7 +93,7 @@ public class BuildController {
         System.out.println("🛑 Stopping task for project: " + projectId);
 
         ecsService.stopTask(cluster, task.taskArn(), "Stopped via API");
-        nginxRoutingService.removeRoute(projectId);
+        routingBackend.removeRoute(projectId);
         taskRegistry.removeTask(projectId);
 
         return ResponseEntity.ok(Map.of(
@@ -98,9 +104,19 @@ public class BuildController {
 
     @PostMapping("/test-local")
     public BuildResponse triggerLocalBuild(@Valid @RequestBody BuildRequest request) {
+        if (projectRepository.findBySlug(request.getProjectId()).isEmpty()) {
+            com.BuildBox.BuildServer.model.Project p = new com.BuildBox.BuildServer.model.Project();
+            p.setSlug(request.getProjectId());
+            p.setName("Test Local Project");
+            projectRepository.save(p);
+            System.out.println("✅ Seeded test project: " + request.getProjectId());
+        }
+
         executor.startBuildLocal(
                 request.getProjectId(),
-                request.getRuntime());
+                request.getRuntime(),
+                request.getDeploymentId(),
+                request.getBasePath());
 
         return new BuildResponse(
                 request.getProjectId(),

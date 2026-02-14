@@ -1,0 +1,42 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+logs/
+bin/
+
+# Java/Build
+target/
+build/
+*.class
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+
+# Configuration (Excluding secrets)
+*.properties
+*.env
+*.env.*
+!**/src/main/resources/*.properties.example
+!**/src/test/resources/*.properties

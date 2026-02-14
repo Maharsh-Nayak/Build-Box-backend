@@ -11,20 +11,20 @@ public class TaskPortDiscoveryService {
 
     private final EcsService ecsService;
     private final TaskRegistry taskRegistry;
-    private final NginxRoutingService nginxRoutingService;
+    private final RoutingBackend routingBackend;
 
     public TaskPortDiscoveryService(EcsService ecsService,
             TaskRegistry taskRegistry,
-            NginxRoutingService nginxRoutingService) {
+            RoutingBackend routingBackend) {
         this.ecsService = ecsService;
         this.taskRegistry = taskRegistry;
-        this.nginxRoutingService = nginxRoutingService;
+        this.routingBackend = routingBackend;
     }
 
     /**
      * Polls ECS for the task status until it is RUNNING, then:
      * 1. Discovers the dynamically assigned port
-     * 2. Adds an Nginx route for clean URL access
+     * 2. Adds route via active backend (Nginx or ALB)
      * 3. Registers the task in the registry
      */
     public TaskInfo discoverAndRegister(String cluster, String taskArn, String projectId, String runtime,
@@ -49,8 +49,8 @@ public class TaskPortDiscoveryService {
                         System.out.println("✅ Port discovered: " + port);
                         System.out.println("✅ Host discovered: " + host);
 
-                        // AUTO: Add Nginx route for clean URL access
-                        nginxRoutingService.addRoute(projectId, host, port);
+                        // Provision route via active backend (Nginx or ALB)
+                        routingBackend.addRoute(projectId, host, port);
 
                         // Register in task registry
                         taskRegistry.register(projectId, taskArn, runtime, host, port);

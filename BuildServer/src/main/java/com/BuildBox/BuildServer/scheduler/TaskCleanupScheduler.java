@@ -2,7 +2,7 @@ package com.BuildBox.BuildServer.scheduler;
 
 import com.BuildBox.BuildServer.aws.EcsService;
 import com.BuildBox.BuildServer.model.TaskInfo;
-import com.BuildBox.BuildServer.service.NginxRoutingService;
+import com.BuildBox.BuildServer.service.RoutingBackend;
 import com.BuildBox.BuildServer.service.TaskRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ public class TaskCleanupScheduler {
 
     private final TaskRegistry taskRegistry;
     private final EcsService ecsService;
-    private final NginxRoutingService nginxRoutingService;
+    private final RoutingBackend routingBackend;
 
     @Value("${ecs.cluster.name:buildserver-cluster-1}")
     private String cluster;
@@ -25,10 +25,10 @@ public class TaskCleanupScheduler {
     private long idleTimeoutSeconds;
 
     public TaskCleanupScheduler(TaskRegistry taskRegistry, EcsService ecsService,
-            NginxRoutingService nginxRoutingService) {
+            RoutingBackend routingBackend) {
         this.taskRegistry = taskRegistry;
         this.ecsService = ecsService;
-        this.nginxRoutingService = nginxRoutingService;
+        this.routingBackend = routingBackend;
     }
 
     @Scheduled(fixedRate = 60000) // Check every minute
@@ -57,8 +57,8 @@ public class TaskCleanupScheduler {
             // 1. Stop ECS task
             ecsService.stopTask(cluster, task.taskArn(), "Idle timeout");
 
-            // 2. Remove Nginx route
-            nginxRoutingService.removeRoute(projectId);
+            // 2. Remove route
+            routingBackend.removeRoute(projectId);
 
             // 3. Remove from registry
             taskRegistry.removeTask(projectId);

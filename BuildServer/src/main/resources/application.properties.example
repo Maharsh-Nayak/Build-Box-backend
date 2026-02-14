@@ -1,0 +1,41 @@
+spring.application.name=BuildServer
+server.port=9191
+
+# AWS Configuration
+aws.region=ap-south-1
+
+# ECS Configuration
+ecs.cluster.name=buildserver-cluster-1
+ecs.subnet.id=YOUR_SUBNET_ID
+ecs.security.group.id=YOUR_SG_ID
+
+# ALB Configuration
+routing.backend=alb
+routing.alb.arn=YOUR_ALB_ARN
+routing.alb.listener.arn=YOUR_LISTENER_ARN
+routing.alb.dns.host=buildbox.com
+
+# S3 Configuration
+s3.bucket.name=YOUR_BUCKET_NAME
+
+# ECR Configuration
+ecr.registry.uri=YOUR_ECR_URI
+ecr.repository.name=buildbox/buildserver
+
+# Credentials (Placeholder)
+aws.s3.accessKey=YOUR_ACCESS_KEY
+aws.s3.secretKey=YOUR_SECRET_KEY
+aws.ecs.accessKey=YOUR_ACCESS_KEY
+aws.ecs.secretKey=YOUR_SECRET_KEY
+
+# Redis Configuration
+spring.data.redis.host=YOUR_REDIS_HOST
+spring.data.redis.port=12608
+spring.data.redis.password=YOUR_REDIS_PASSWORD
+spring.data.redis.username=default
+spring.data.redis.ssl.enabled=true
+
+# PostgreSQL Configuration
+spring.datasource.url=jdbc:postgresql://YOUR_DB_HOST:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_DB_PASSWORD

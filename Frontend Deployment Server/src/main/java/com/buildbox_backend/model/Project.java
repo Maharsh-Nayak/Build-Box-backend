@@ -18,13 +18,15 @@ public class Project {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;     // personal project
+    private User user; // personal project
 
     @ManyToOne
     @JoinColumn(name = "team_id")
-    private Team team;     // team project
+    private Team team; // team project
 
     private String repoUrl;
+
+    private String basePath;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -82,5 +84,13 @@ public class Project {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
     }
 }

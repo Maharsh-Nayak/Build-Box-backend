@@ -16,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Nginx to reload.
  */
 @Service
-public class NginxRoutingService {
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "routing.backend", havingValue = "nginx", matchIfMissing = true)
+public class NginxRoutingService implements RoutingBackend {
 
     @Value("${nginx.conf.path:/etc/nginx/sites-enabled}")
     private String NGINX_CONF_DIR;
@@ -105,6 +106,15 @@ public class NginxRoutingService {
         } catch (Exception e) {
             System.err.println("⚠️ Nginx reload signal failed. Ensure Nginx is installed on the host and running.");
         }
+    }
+
+    @Override
+    public com.BuildBox.BuildServer.dto.RoutingDetails getRoutingDetails(String projectId) {
+        RouteInfo info = activeRoutes.get(projectId);
+        if (info == null) {
+            return null;
+        }
+        return com.BuildBox.BuildServer.dto.RoutingDetails.direct(info.targetHost(), info.targetPort());
     }
 
     public String getRouteUrl(String projectId) {

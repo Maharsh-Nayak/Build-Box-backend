@@ -93,26 +93,25 @@ class ReverseProxy {
             const statusData = statusRes.data; // { state: "RUNNING", host: "...", port: ... } OR { state: "STOPPED" }
 
             if (statusData.state === 'RUNNING') {
-                // Proxy to Internal Nginx (or directly to IP if we wanted, but User Architecture uses Nginx)
-                // Wait, User Prompt says "Proxy request to: http://host:port" (Step 3A)
-                // But our architecture has an Internal Nginx.
-                // The "host" in statusData is the EC2 IP. "port" is the Dynamic Port.
-                // We CAN proxy directly to that IP:Port if reachable.
-                // OR proxy to Nginx with Host header.
-                // Prompt says "Backend auto-starts... Frontend NO need rebuild".
-                // "Return response to client."
+                const routing = statusData.routing;
 
-                // If I proxy to Nginx, I use: target: config.NGINX_URL, headers: { host: `${project}.localhost` }
-                // If I proxy direct: target: `http://${statusData.host}:${statusData.port}`
+                if (routing && routing.mode === 'alb') {
+                    // ALB-First Routing Mode
+                    console.log(`[Backend] ALB Mode: Proxying to ${routing.targetUrl} with Host: ${routing.hostHeader}`);
 
-                // Prompt Step 3A: "Proxy request to: http://host:port"
-                // This implies DIRECT connection from Proxy to Container (Host Port).
-                // This skips the Internal Nginx.
-                // Since I have the IP/Port from the API, I will follow the prompt and proxy directly.
-                // This reduces latency.
+                    this.proxy.web(req, res, {
+                        target: routing.targetUrl,
+                        changeOrigin: true,
+                        headers: {
+                            host: routing.hostHeader
+                        }
+                    });
+                    return;
+                }
 
+                // Default / Direct Routing Mode
                 const target = `http://${statusData.host}:${statusData.port}`;
-                console.log(`[Backend] Proxying to Running Task: ${target}`);
+                console.log(`[Backend] Direct Mode: Proxying to Running Task: ${target}`);
 
                 this.proxy.web(req, res, {
                     target: target,
@@ -132,9 +131,20 @@ class ReverseProxy {
                     // Get Info Again
                     const newStatus = await axios.get(statusUrl);
                     const t = newStatus.data;
-                    const target = `http://${t.host}:${t.port}`;
-                    console.log(`[Backend] Cold Start Complete. Proxying to: ${target}`);
-                    this.proxy.web(req, res, { target: target, changeOrigin: true });
+                    const routing = t.routing;
+
+                    if (routing && routing.mode === 'alb') {
+                        console.log(`[Backend] Cold Start (ALB Mode) Complete. Proxying to: ${routing.targetUrl}`);
+                        this.proxy.web(req, res, {
+                            target: routing.targetUrl,
+                            changeOrigin: true,
+                            headers: { host: routing.hostHeader }
+                        });
+                    } else {
+                        const target = `http://${t.host}:${t.port}`;
+                        console.log(`[Backend] Cold Start (Direct Mode) Complete. Proxying to: ${target}`);
+                        this.proxy.web(req, res, { target: target, changeOrigin: true });
+                    }
                 } else {
                     res.status(503).send('Service Unavailable - Failed to start app');
                 }

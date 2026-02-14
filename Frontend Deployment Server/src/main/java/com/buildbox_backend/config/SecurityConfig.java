@@ -21,33 +21,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   OAuthSuccessHandler successHandler,
-                                                   JwtAuthFilter jwtFilter) throws Exception {
+            OAuthSuccessHandler successHandler,
+            JwtAuthFilter jwtFilter) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
+                .cors(cors -> {
+                })
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/public/**",
-                                "/health",
-                                "/deploy",
-                                "/auth/**",
-                                "/oauth2/**",
-                                "/me",
-                                "/deployProject/v2",
-                                "/deploymentLogs/**",
-                                "/api/v2/buildLogs/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().permitAll())
 
                 // disable default login behaviours
                 .formLogin(f -> f.disable())
                 .httpBasic(b -> b.disable())
-                
+
                 // OAuth success handler
                 .oauth2Login(oauth -> oauth.successHandler(successHandler))
 
@@ -57,8 +45,7 @@ public class SecurityConfig {
                             res.setStatus(401);
                             res.setContentType("application/json");
                             res.getWriter().write("{\"error\":\"Unauthorized\"}");
-                        })
-                );
+                        }));
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

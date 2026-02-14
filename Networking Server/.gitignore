@@ -1,57 +1,16 @@
-# =========================
 # Node.js
-# =========================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# =========================
-# Environment files
-# =========================
-.env
-.env.local
-.env.development
-.env.production
-
-# =========================
-# OS / Editor junk
-# =========================
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# =========================
-# Logs
-# =========================
-logs/
-*.log
-
-# =========================
 # Build / Temp
-# =========================
 dist/
 build/
 tmp/
 temp/
 
-# =========================
-# Docker (optional)
-# =========================
-docker-compose.override.yml
-
-# =========================
-# Coverage / Test
-# =========================
-coverage/
-.nyc_output/
-
-# =========================
 # Misc
-# =========================
 *.tgz
 *.pid
