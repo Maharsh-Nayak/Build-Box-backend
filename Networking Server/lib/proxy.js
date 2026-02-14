@@ -20,13 +20,16 @@ class ReverseProxy {
 
     async handleRequest(req, res) {
         const hostname = req.hostname;
-        // Parse Hostname
-        // Production: (api.)?{project}.{user}.buildbox.com
-        // Dev: (api.)?{project}.localhost (User part might be missing in dev, fallback to default user)
 
-        let type = 'FRONTEND'; // Default
+        // Handle Platform-level API calls (from Main UI)
+        if (req.url.startsWith('/api') && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+            return await this.handleApiRequest(req, res);
+        }
+
+        // Parse Hostname project subdomains
+        let type = 'FRONTEND';
         let project = '';
-        let user = 'test-user'; // Default for dev
+        let user = 'test-user';
 
         const parts = hostname.split('.');
 
@@ -167,6 +170,22 @@ class ReverseProxy {
             }
         }
         return false;
+    }
+
+    async handleApiRequest(req, res) {
+        let target;
+        // Route to Log Analytics or Frontend Deployment Server
+        if (req.url.startsWith('/api/v2/buildLogs') || req.url.startsWith('/api/logs')) {
+            target = config.LOG_ANALYTICS_URL;
+        } else {
+            target = config.FRONTEND_SERVER_URL;
+        }
+
+        console.log(`[API Proxy] ${req.method} ${req.url} -> ${target}`);
+        this.proxy.web(req, res, {
+            target: target,
+            changeOrigin: true
+        });
     }
 }
 

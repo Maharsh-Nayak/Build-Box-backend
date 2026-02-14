@@ -2,17 +2,20 @@ package com.buildbox_backend.controller;
 
 import com.buildbox_backend.model.Deployment;
 import com.buildbox_backend.model.Project;
+import com.buildbox_backend.model.User;
+import com.buildbox_backend.repository.UserRepository;
 import com.buildbox_backend.service.DeploymentService;
 import com.buildbox_backend.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/projects/{slug}/deployments")
+@RequestMapping("/api")
 public class DeploymentController {
 
     @Autowired
@@ -21,7 +24,18 @@ public class DeploymentController {
     @Autowired
     private ProjectService projectService;
 
-    @PostMapping
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping("/deployments")
+    public ResponseEntity<List<Deployment>> listAllDeployments(Authentication auth) {
+        User user = getUser(auth);
+        if (user == null)
+            return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(deploymentService.getUserDeployments(user.getId()));
+    }
+
+    @PostMapping("/projects/{slug}/deployments")
     public ResponseEntity<?> triggerDeployment(@PathVariable String slug,
             @RequestBody(required = false) Map<String, String> body) {
         Project project = projectService.getBySlug(slug).orElse(null);
@@ -53,7 +67,7 @@ public class DeploymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/projects/{slug}/deployments/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable String slug,
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
@@ -63,5 +77,11 @@ public class DeploymentController {
 
         Deployment updated = deploymentService.updateStatus(id, status);
         return ResponseEntity.ok(updated);
+    }
+
+    private User getUser(Authentication auth) {
+        if (auth == null)
+            return null;
+        return userRepository.findByEmail(auth.getName()).orElse(null);
     }
 }

@@ -12,5 +12,7 @@ public interface DeploymentRepository extends JpaRepository<Deployment, Long> {
 
     List<Deployment> findByProjectIdOrderByCreatedAtDesc(Long projectId);
 
+    List<Deployment> findByProjectUserIdOrderByCreatedAtDesc(Long userId);
+
     Optional<Deployment> findTopByProjectIdOrderByVersionDesc(Long projectId);
 }

@@ -1,0 +1,23 @@
+spring.application.name=BuildBox_Log_Analytics
+server.port=9012
+
+# R2DBC PostgreSQL
+spring.r2dbc.url=r2dbc:postgresql://YOUR_DB_HOST:5432/postgres
+spring.r2dbc.username=postgres
+spring.r2dbc.password=YOUR_DB_PASSWORD
+
+# OAuth
+spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
+spring.security.oauth2.client.registration.github.client-id=YOUR_CLIENT_ID
+spring.security.oauth2.client.registration.github.client-secret=YOUR_CLIENT_SECRET
+
+# JWT
+jwt.sercetkey=YOUR_JWT_SECRET
+
+# Redis
+spring.data.redis.host=YOUR_REDIS_HOST
+spring.data.redis.port=12608
+spring.data.redis.password=YOUR_REDIS_PASSWORD
+spring.data.redis.username=default
+spring.data.redis.ssl.enabled=true

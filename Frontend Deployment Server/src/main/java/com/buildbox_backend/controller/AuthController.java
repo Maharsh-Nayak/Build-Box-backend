@@ -1,4 +1,5 @@
 package com.buildbox_backend.controller;
+
 import com.buildbox_backend.dto.AuthResponse;
 import com.buildbox_backend.dto.LoginRequest;
 import com.buildbox_backend.dto.SignupRequest;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
@@ -45,13 +46,15 @@ public class AuthController {
     // ---------- CURRENT USER ----------
     @GetMapping("/me")
     public ResponseEntity<User> me(Authentication auth) {
-        if (auth == null) return ResponseEntity.status(401).build();
+        if (auth == null)
+            return ResponseEntity.status(401).build();
 
         String email = auth.getName();
         return userRepository.findByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).build());
     }
+
     @GetMapping("/health")
     public String health() {
         return "OK";
@@ -68,4 +71,3 @@ public class AuthController {
     }
 
 }
-

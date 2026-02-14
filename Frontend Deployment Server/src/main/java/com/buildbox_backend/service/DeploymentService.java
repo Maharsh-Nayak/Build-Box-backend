@@ -98,4 +98,8 @@ public class DeploymentService {
         }
         return deploymentRepository.save(deployment);
     }
+
+    public List<Deployment> getUserDeployments(Long userId) {
+        return deploymentRepository.findByProjectUserIdOrderByCreatedAtDesc(userId);
+    }
 }

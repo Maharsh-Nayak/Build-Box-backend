@@ -10,7 +10,8 @@ app.use(async (req, res, next) => {
         const subdomain = hostname.split('.')[0];
 
         // Skip health checks or internal routes which might not have a subdomain
-        if (hostname === 'localhost' || !subdomain) {
+        // Allow localhost to proceed so we can handle /api routes on port 8000
+        if (hostname === 'localhost' && !req.url.startsWith('/api')) {
             return res.status(200).send('BuildBox Reverse Proxy Running');
         }
 
