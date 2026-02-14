@@ -19,11 +19,12 @@ public class ProjectService {
     @Autowired
     private ActivityService activityService;
 
-    public Project createProject(String name, String repoUrl, User user) {
+    public Project createProject(String name, String repoUrl, String basePath, User user) {
         Project project = new Project();
         project.setName(name);
         project.setSlug(generateSlug(name));
         project.setRepoUrl(repoUrl);
+        project.setBasePath(basePath);
         project.setUser(user);
         project.setCreatedAt(LocalDateTime.now());
 

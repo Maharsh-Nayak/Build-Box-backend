@@ -30,12 +30,13 @@ public class ProjectController {
 
         String name = body.get("name");
         String repoUrl = body.get("repoUrl");
+        String basePath = body.get("basePath");
 
         if (name == null || name.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
         }
 
-        Project project = projectService.createProject(name, repoUrl, user);
+        Project project = projectService.createProject(name, repoUrl, basePath, user);
         return ResponseEntity.ok(project);
     }
 
@@ -88,8 +89,7 @@ public class ProjectController {
 
         if (!projectService.getBySlug("test-fullstack-app").isPresent()) {
             Project p = projectService.createProject("Test Fullstack App",
-                    "https://github.com/kavyacp123/build-box-test.git", user);
-            p.setBasePath("Backend");
+                    "https://github.com/kavyacp123/build-box-test.git", "Backend", user);
             projectService.updateProject(p, p.getName(), p.getRepoUrl());
         }
 
