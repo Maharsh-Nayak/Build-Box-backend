@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/builds")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BuildController {
 
     @Value("${ecs.cluster.name:buildserver-cluster-1}")
