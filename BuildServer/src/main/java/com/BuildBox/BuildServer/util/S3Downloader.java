@@ -22,12 +22,19 @@ public class S3Downloader {
                         String prefix,
                         Path destination) throws IOException {
 
+                System.out.println("Downloading directory: " + bucket + "/" + prefix);
+                System.out.println("Destination: " + destination);
+
                 ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
                                 .bucket(bucket)
                                 .prefix(prefix)
                                 .build();
 
+                System.out.println("Request: " + listRequest);
+                System.out.println("Req " + listRequest.bucket() + " " + listRequest.prefix() + " ");
+
                 ListObjectsV2Response listResponse = s3Client.listObjectsV2(listRequest);
+                System.out.println("download size : " + listResponse.contents().size());
 
                 for (S3Object object : listResponse.contents()) {
 
@@ -36,8 +43,16 @@ public class S3Downloader {
                                 continue;
                         }
 
-                        Path filePath = destination.resolve(
-                                        object.key().substring(prefix.length()));
+//                        Path filePath = destination.resolve(
+//                                        object.key().substring(prefix.length()));
+
+                        String relativeKey = object.key().substring(prefix.length());
+
+                        if (relativeKey.startsWith("/")) {
+                                relativeKey = relativeKey.substring(1);
+                        }
+
+                        Path filePath = destination.resolve(relativeKey);
 
                         Files.createDirectories(filePath.getParent());
 
@@ -46,7 +61,14 @@ public class S3Downloader {
                                         .key(object.key())
                                         .build();
 
-                        s3Client.getObject(getRequest, filePath);
+                        System.out.println("Downloading " + filePath);
+                        System.out.println("Downloading " + getRequest);
+
+                        try{
+                                s3Client.getObject(getRequest, filePath);
+                        } catch (Exception e) {
+                                throw new RuntimeException(e);
+                        }
                 }
         }
 }

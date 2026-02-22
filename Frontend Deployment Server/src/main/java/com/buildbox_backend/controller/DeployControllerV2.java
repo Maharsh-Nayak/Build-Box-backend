@@ -2,7 +2,10 @@ package com.buildbox_backend.controller;
 
 
 import com.buildbox_backend.dto.GitCloneRequest;
+import com.buildbox_backend.model.User;
+import com.buildbox_backend.repository.UserRepository;
 import com.buildbox_backend.service.ECSService;
+import com.buildbox_backend.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,16 +14,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/deployProject")
 public class DeployControllerV2 {
 
     private ECSService ecsService;
+    private ProjectService projectService;
+    private UserRepository userRepository;
 
     @Autowired
-    public DeployControllerV2(ECSService ecsService) {
+    public DeployControllerV2(ECSService ecsService, ProjectService projectService, UserRepository userRepository) {
         this.ecsService = ecsService;
+        this.projectService = projectService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/v2")
@@ -33,6 +41,9 @@ public class DeployControllerV2 {
 
         String buildId = Ids.get("buildId");
         String taskId = Ids.get("taskId");
+
+        Optional<User> u = userRepository.findById(Long.valueOf(request.getUserId()));
+        projectService.createProject(request.getProjectName(), request.getLink(), request.getFrontendDirectory(), u.get());
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Deployment started",

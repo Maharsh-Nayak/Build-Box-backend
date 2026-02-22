@@ -65,9 +65,14 @@ public class BuildService {
 
         tracker.log(deploymentId, "📥 Downloading source code from S3...");
         tracker.updateStatus(deploymentId, "BUILDING");
-        s3.downloadDirectory(BUCKET, projectId + "/", projectDir);
 
-        return buildFromDirectory(projectId, runtime, projectDir, deploymentId, basePath);
+        try{
+            s3.downloadDirectory(BUCKET, basePath, projectDir);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return buildFromDirectory(projectId, runtime, projectDir, deploymentId, null);
     }
 
     /**
@@ -113,9 +118,11 @@ public class BuildService {
             throws Exception {
 
         Path buildContext = projectDir;
+//        basePath = "";
         if (basePath != null && !basePath.isEmpty()) {
             buildContext = projectDir.resolve(basePath);
             tracker.log(deploymentId, "📂 Setting build context to: " + basePath);
+            System.out.println(buildContext);
         }
 
         // 1. Copy appropriate Dockerfile
@@ -190,6 +197,9 @@ public class BuildService {
         // Set deployment URL and mark as complete
         tracker.setDeploymentUrl(deploymentId, projectId + ".localhost");
         tracker.complete(deploymentId, true);
+
+        // deleting folder after completion as without it some error is coming of un-marsheling from aws sdk !
+        Files.delete(Path.of(BASE_DIR, projectId));
 
         return taskArn;
     }

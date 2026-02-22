@@ -31,7 +31,7 @@ public class TaskCleanupScheduler {
         this.routingBackend = routingBackend;
     }
 
-    @Scheduled(fixedRate = 60000) // Check every minute
+    @Scheduled(fixedRate = 180000) // Check every minute
     public void cleanupIdleTasks() {
         System.out.println("🧹 Checking for idle tasks...");
         Instant now = Instant.now();

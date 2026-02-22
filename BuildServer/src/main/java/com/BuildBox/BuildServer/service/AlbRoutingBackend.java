@@ -48,18 +48,18 @@ public class AlbRoutingBackend implements RoutingBackend {
 
         try {
             // Find project entity for priority allocation
-            Project project = projectRepository.findBySlug(projectId)
+            Project project = projectRepository.findByName(projectId)
                     .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
 
             // 1. Ensure Target Group exists
-            String targetGroupName = "bb-" + projectId;
+            String targetGroupName = "bb-" + project.getSlug();
             String targetGroupArn = ensureTargetGroup(targetGroupName);
 
             // 2. Register Target
             registerTarget(targetGroupArn, host, port);
 
             // 3. Ensure Listener Rule exists
-            String hostHeader = "api." + projectId + "." + BASE_DOMAIN;
+            String hostHeader = "api." + project.getSlug() + "." + BASE_DOMAIN;
             ensureListenerRule(targetGroupArn, hostHeader, project);
 
             System.out.println("✅ ALB: Route ready at https://" + hostHeader);

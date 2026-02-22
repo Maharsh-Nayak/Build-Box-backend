@@ -28,6 +28,9 @@ public class ProjectService {
         project.setUser(user);
         project.setCreatedAt(LocalDateTime.now());
 
+        project.setDeploy_url("https://buildbox-frontend.s3.ap-south-1.amazonaws.com/"+user.getId()+"/"+name+"/Frontend/index.html");
+        project.setBackend_link("api."+name+".localhost:8000");
+
         Project saved = projectRepository.save(project);
         activityService.log(user.getId(), saved.getId(), "Created project: " + name);
         return saved;
@@ -42,7 +45,16 @@ public class ProjectService {
     }
 
     public Optional<Project> getBySlug(String slug) {
-        return projectRepository.findBySlug(slug);
+
+        Optional<Project>project = (projectRepository.findBySlug(slug));
+
+        if (project.isPresent()) {
+            System.out.println(project.get().getName());
+        }else{
+            System.out.println("Project not found");
+        }
+
+        return project;
     }
 
     public Optional<Project> getById(Long id) {

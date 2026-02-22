@@ -4,6 +4,7 @@ import com.BuildBox.BuildServer.aws.EcsService;
 import com.BuildBox.BuildServer.aws.CloudWatchLogsService;
 import com.BuildBox.BuildServer.dto.BuildRequest;
 import com.BuildBox.BuildServer.dto.BuildResponse;
+import com.BuildBox.BuildServer.model.Project;
 import com.BuildBox.BuildServer.model.TaskInfo;
 import com.BuildBox.BuildServer.service.AsyncBuildExecutor;
 import com.BuildBox.BuildServer.service.RoutingBackend;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/builds")
 public class BuildController {
 
@@ -70,14 +73,36 @@ public class BuildController {
 
     @GetMapping("/tasks/{projectId}/logs")
     public ResponseEntity<List<String>> getTaskLogs(@PathVariable String projectId) {
+
+//        System.out.println(projectId);
+//
+//        Optional<Project> project = projectRepository.findBySlug(projectId);
+//
+//        Long id=null;
+//        if(project.isPresent()) {
+//            id = project.get().getId();
+//        }else{
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        System.out.println(id);
+
+//        TaskInfo task = taskRegistry.getTask(id.toString());
+
         TaskInfo task = taskRegistry.getTask(projectId);
+
         if (task == null) {
             return ResponseEntity.notFound().build();
         }
 
         String logGroupName = task.runtime().contains("node") ? "/ecs/user-node-app" : "/ecs/user-python-app";
+
+        System.out.println(logGroupName);
+
         // Stream prefix is projectId
         String logStreamName = "user-" + task.runtime() + "-app/" + projectId + "/" + task.taskArn().split("/")[2];
+
+        System.out.println(logStreamName);
 
         return ResponseEntity.ok(logsService.getLogs(logGroupName, logStreamName));
     }

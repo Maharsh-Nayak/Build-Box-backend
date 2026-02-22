@@ -12,6 +12,7 @@ public class Activity {
     private Long id;
 
     private Long userId;
+
     private Long projectId;
 
     @Column(nullable = false)

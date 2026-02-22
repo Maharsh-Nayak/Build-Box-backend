@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -43,13 +44,21 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<List<Project>> listProjects(Authentication auth) {
         User user = getUser(auth);
+        System.out.println("user: " + user);
+
         if (user == null)
             return ResponseEntity.status(401).build();
+
+        List<Project> ans = projectService.getUserProjects(user.getId());
+//        System.out.println(ans.get(0).getName());
         return ResponseEntity.ok(projectService.getUserProjects(user.getId()));
     }
 
     @GetMapping("/{slug}")
     public ResponseEntity<?> getProject(@PathVariable String slug, Authentication auth) {
+
+        System.out.println("Slug: " + slug);
+
         return projectService.getBySlug(slug)
                 .map(p -> ResponseEntity.ok((Object) p))
                 .orElse(ResponseEntity.notFound().build());
@@ -99,6 +108,11 @@ public class ProjectController {
     private User getUser(Authentication auth) {
         if (auth == null)
             return null;
-        return userRepository.findByEmail(auth.getName()).orElse(null);
+        System.out.println(auth.getName());
+        Optional<User> u = userRepository.findByEmail(auth.getName());
+
+        u.ifPresent(user -> System.out.println(user.getName()));
+
+        return u.orElse(null);
     }
 }

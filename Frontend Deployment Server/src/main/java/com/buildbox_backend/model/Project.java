@@ -16,11 +16,11 @@ public class Project {
     @Column(unique = true, nullable = false)
     private String slug;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user; // personal project
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "team_id")
     private Team team; // team project
 
@@ -29,6 +29,26 @@ public class Project {
     private String basePath;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public String getBackend_link() {
+        return backend_link;
+    }
+
+    public void setBackend_link(String backend_link) {
+        this.backend_link = backend_link;
+    }
+
+    private String backend_link;
+
+    public String getDeploy_url() {
+        return deploy_url;
+    }
+
+    public void setDeploy_url(String deploy_url) {
+        this.deploy_url = deploy_url;
+    }
+
+    private String deploy_url;
 
     public Long getId() {
         return id;

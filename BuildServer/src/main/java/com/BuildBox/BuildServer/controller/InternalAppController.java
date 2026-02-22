@@ -1,6 +1,7 @@
 package com.BuildBox.BuildServer.controller;
 
 import com.BuildBox.BuildServer.model.Project;
+import com.BuildBox.BuildServer.model.User;
 import com.BuildBox.BuildServer.repository.ProjectRepository;
 import com.BuildBox.BuildServer.service.AsyncBuildExecutor;
 import com.BuildBox.BuildServer.service.TaskRegistry;
@@ -54,13 +55,19 @@ public class InternalAppController {
     @PostMapping("/{user}/{project}/start")
     public ResponseEntity<Map<String, String>> startApp(@PathVariable String user, @PathVariable String project) {
         // Look up project metadata from DB for correct runtime/basePath
-        Optional<Project> projectOpt = projectRepository.findBySlug(project);
+//        Optional<Project> projectOpt = projectRepository.findBySlug(project);
+        System.out.println(project);
+        Optional<Project> projectOpt = projectRepository.findByName(project);
 
         String runtime = (project.contains("python") || project.contains("flask")) ? "python" : "node";
         String basePath = null;
 
         if (projectOpt.isPresent()) {
-            basePath = projectOpt.get().getBasePath();
+            System.out.println(projectOpt.get());
+            User userObj = projectOpt.get().getUser();
+            if (userObj != null) {
+                basePath = userObj.getId() + "/" + projectOpt.get().getName()+"/Backend";
+            }
             // Optional: runtime could also be stored in DB, but slug-based inference is
             // okay for now
         }
@@ -68,7 +75,8 @@ public class InternalAppController {
         System.out.println("DEBUG: Cold start for " + project + " | basePath: " + basePath + " | runtime: " + runtime);
 
         // Trigger local build/start sequence with correct basePath
-        executor.startBuildLocal(project, runtime, null, basePath);
+//        executor.startBuildLocal(project, runtime, null, basePath);
+        executor.startBuild(project, runtime, null, basePath);
 
         return ResponseEntity.accepted().body(Map.of("status", "STARTING"));
     }
