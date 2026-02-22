@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildBox | Deployment Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            scrollbar-width: thin;
+            scrollbar-color: #3182ce transparent;
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: #3182ce;
+            border-radius: 3px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <h1 class="text-5xl font-extrabold gradient-text tracking-tight">BuildBox</h1>
+            <p class="text-slate-400 font-light text-lg">System-Wide Deployment Verification Utility</p>
+        </header>
+
+        <!-- Main Card -->
+        <div class="glass p-6 rounded-3xl shadow-2xl space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-slate-300 ml-1">Repository URL</label>
+                    <input id="repoUrl" type="text" value="https://github.com/kavyacp123/build-box-test.git"
+                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-slate-300 ml-1">Project Slug</label>
+                    <input id="projectSlug" type="text" value="test-fullstack-app"
+                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button id="launchBtn"
+                    class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/20 transform transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Launch Complete End-Flow
+                </button>
+                <button id="stopBtn"
+                    class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-rose-500/20 transform transition-all active:scale-95 hidden">
+                    Stop Task
+                </button>
+                <button id="runtimeLogsBtn"
+                    class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-purple-500/20 transform transition-all active:scale-95 hidden">
+                    Stream Runtime
+                </button>
+            </div>
+        </div>
+
+        <!-- Logs Container (Hidden initially) -->
+        <div id="logsContainer"
+            class="glass rounded-3xl overflow-hidden transition-all duration-500 opacity-0 transform translate-y-4">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <div class="flex items-center gap-2">
+                    <div id="statusDot" class="w-3 h-3 bg-blue-500 rounded-full pulse"></div>
+                    <span id="statusText" class="text-sm font-semibold text-blue-400 tracking-wider">DEPLOYING...</span>
+                </div>
+                <span id="deploymentId" class="text-xs text-slate-500 font-mono">ID: --</span>
+            </div>
+            <div id="terminal" class="terminal h-96 p-6 overflow-y-auto text-sm leading-relaxed">
+                <div class="text-blue-300 opacity-50 italic">Initializing connection to Log Analytics Server...</div>
+            </div>
+        </div>
+
+        <!-- Links Container (Hidden initially) -->
+        <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-0 transition-all duration-700">
+            <a id="frontendLink" target="_blank"
+                class="link-card glass p-6 rounded-2xl border-l-4 border-l-pink-500 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-pink-400">Frontend App</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="feUrlText">Deploying static assets...</p>
+                    </div>
+                    <svg class="w-6 h-6 text-slate-700 group-hover:text-pink-400 transition-colors" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </div>
+            </a>
+            <a id="backendLink" target="_blank"
+                class="link-card glass p-6 rounded-2xl border-l-4 border-l-blue-500 transition-all cursor-pointer group">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-blue-400">Backend API</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="beUrlText">Provisioning ECS cluster...</p>
+                    </div>
+                    <svg class="w-6 h-6 text-slate-700 group-hover:text-blue-400 transition-colors" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const DOM = {
+            repoUrl: document.getElementById('repoUrl'),
+            projectSlug: document.getElementById('projectSlug'),
+            launchBtn: document.getElementById('launchBtn'),
+            logsContainer: document.getElementById('logsContainer'),
+            terminal: document.getElementById('terminal'),
+            statusText: document.getElementById('statusText'),
+            statusDot: document.getElementById('statusDot'),
+            deploymentId: document.getElementById('deploymentId'),
+            linksContainer: document.getElementById('linksContainer'),
+            feUrlText: document.getElementById('feUrlText'),
+            beUrlText: document.getElementById('beUrlText'),
+            feLink: document.getElementById('frontendLink'),
+            beLink: document.getElementById('backendLink'),
+            stopBtn: document.getElementById('stopBtn'),
+            runtimeLogsBtn: document.getElementById('runtimeLogsBtn')
+        };
+
+        let runtimeEventSource = null;
+
+        const API_BASE_FRONTEND = 'http://localhost:9000';
+        const API_BASE_LOGS = 'http://localhost:9012';
+        const API_BASE_BUILD = 'http://localhost:9191';
+
+        DOM.launchBtn.addEventListener('click', async () => {
+            try {
+                // UI Reset
+                DOM.launchBtn.disabled = true;
+                DOM.stopBtn.classList.add('hidden');
+                DOM.terminal.innerHTML = '<div class="text-blue-400">[SYSTEM] Starting deployment cycle...</div>';
+                DOM.logsContainer.classList.remove('opacity-0', 'translate-y-4');
+                DOM.linksContainer.classList.add('opacity-0');
+
+                log('Seeding project in database...', 'blue');
+                await fetch(`${API_BASE_FRONTEND}/api/projects/test/seed`);
+
+                log('Triggering BuildServer deployment...', 'blue');
+                const deployRes = await fetch(`${API_BASE_FRONTEND}/api/projects/${DOM.projectSlug.value}/deployments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch: 'main' })
+                });
+
+                if (!deployRes.ok) throw new Error('Deployment trigger failed');
+
+                const deployment = await deployRes.json();
+                DOM.deploymentId.innerText = `ID: ${deployment.id}`;
+                log(`Deployment ID ${deployment.id} accepted. Status: ${deployment.status}`, 'green');
+
+                DOM.stopBtn.classList.remove('hidden');
+                startLogStreaming(deployment.id, DOM.projectSlug.value);
+            } catch (err) {
+                log(`ERROR: ${err.message}`, 'red');
+                DOM.launchBtn.disabled = false;
+            }
+        });
+
+        DOM.stopBtn.addEventListener('click', async () => {
+            try {
+                log(`Stopping project: ${DOM.projectSlug.value}...`, 'rose');
+                const stopRes = await fetch(`${API_BASE_BUILD}/api/builds/tasks/${DOM.projectSlug.value}`, {
+                    method: 'DELETE'
+                });
+
+                if (stopRes.ok) {
+                    log('✅ Project stopped successfully', 'green');
+                    DOM.statusText.innerText = 'STOPPED';
+                    DOM.statusText.classList.replace('text-blue-400', 'text-rose-400');
+                    DOM.statusDot.classList.replace('bg-blue-500', 'bg-rose-500');
+                    DOM.statusDot.classList.remove('pulse');
+                    DOM.stopBtn.classList.add('hidden');
+                    DOM.launchBtn.disabled = false;
+                } else {
+                    const err = await stopRes.json();
+                    log(`❌ Stop failed: ${err.message || 'Unknown error'}`, 'red');
+                }
+            } catch (err) {
+                log(`❌ Error calling stop: ${err.message}`, 'red');
+            }
+        });
+
+        DOM.runtimeLogsBtn.addEventListener('click', () => {
+            if (runtimeEventSource) {
+                runtimeEventSource.close();
+                runtimeEventSource = null;
+                log('Stopped Runtime Stream', 'slate');
+                DOM.runtimeLogsBtn.innerText = 'Stream Runtime';
+                return;
+            }
+
+            log(`Connecting to Runtime SSE Stream for ${DOM.projectSlug.value}...`, 'purple');
+            runtimeEventSource = new EventSource(`${API_BASE_LOGS}/api/v2/runtime/${DOM.projectSlug.value}/logs`);
+            DOM.runtimeLogsBtn.innerText = 'Stop Runtime Stream';
+
+            runtimeEventSource.addEventListener('log', (e) => {
+                const [source, ...parts] = e.data.split('|');
+                const message = parts.length > 0 ? parts.join('|') : source;
+                const color = source === 'system' ? 'purple' : 'emerald';
+                log(`[${source}] ${message}`, color);
+            });
+
+            runtimeEventSource.onerror = (e) => {
+                console.error('Runtime SSE Error:', e);
+                log('❌ Runtime connection error. Retrying...', 'red');
+            };
+        });
+
+        function log(msg, color = 'slate') {
+            const colors = {
+                blue: 'text-blue-400',
+                green: 'text-emerald-400',
+                red: 'text-rose-400',
+                slate: 'text-slate-300',
+                purple: 'text-purple-400',
+                emerald: 'text-emerald-400'
+            };
+            const div = document.createElement('div');
+            div.className = `${colors[color]} mb-1`;
+            div.innerHTML = `<span class="opacity-30 text-[10px] mr-2">${new Date().toLocaleTimeString()}</span> ${msg}`;
+            DOM.terminal.appendChild(div);
+            DOM.terminal.scrollTop = DOM.terminal.scrollHeight;
+        }
+
+        function startLogStreaming(id, slug) {
+            log('Connecting to SSE Stream...', 'blue');
+            const eventSource = new EventSource(`${API_BASE_LOGS}/api/v2/buildLogs/${id}/logs`);
+
+            eventSource.addEventListener('log', (e) => {
+                const message = e.data;
+                log(message);
+
+                if (message.includes('completed successfully') || message.includes('Deployment completed')) {
+                    finishDeployment(slug);
+                    eventSource.close();
+                }
+
+                if (message.includes('failed') || message.includes('❌')) {
+                    DOM.statusText.innerText = 'FAILED';
+                    DOM.statusText.classList.replace('text-blue-400', 'text-rose-400');
+                    DOM.statusDot.classList.replace('bg-blue-500', 'bg-rose-500');
+                    DOM.statusDot.classList.remove('pulse');
+                    DOM.launchBtn.disabled = false;
+                    eventSource.close();
+                }
+            });
+
+            eventSource.onerror = (e) => {
+                // SSE often disconnects after inactivity or at the end of a stream
+                console.log('SSE status changed');
+            };
+        }
+
+        function finishDeployment(slug) {
+            DOM.statusText.innerText = 'OPERATIONAL';
+            DOM.statusText.classList.replace('text-blue-400', 'text-emerald-400');
+            DOM.statusDot.classList.replace('bg-blue-500', 'bg-emerald-500');
+            DOM.statusDot.classList.remove('pulse');
+
+            const feUrl = `http://${slug}.localhost:8000/`;
+            const beUrl = `http://api.${slug}.localhost:8000/`;
+
+            DOM.feUrlText.innerText = feUrl;
+            DOM.beUrlText.innerText = beUrl;
+            DOM.feLink.href = feUrl;
+            DOM.beLink.href = beUrl;
+
+            DOM.linksContainer.classList.remove('opacity-0');
+            DOM.launchBtn.disabled = false;
+            DOM.stopBtn.classList.remove('hidden'); // Show stop task if they want to test lifecycle
+            DOM.runtimeLogsBtn.classList.remove('hidden');
+
+            log('Deployment Verified. Routing active.', 'green');
+        }
+    </script>
+</body>
+
+</html>
