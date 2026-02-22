@@ -38,6 +38,9 @@ public class InternalAppController {
         TaskInfo task = taskRegistry.getTask(project);
 
         if (task != null && "RUNNING".equals(task.status())) {
+            // Reset idle timer on every status check (proxy calls this for each request)
+            taskRegistry.updateActivity(project);
+
             RoutingDetails routing = routingBackend.getRoutingDetails(project);
 
             // For backward compatibility while the proxy is being updated, we can still

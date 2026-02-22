@@ -9,37 +9,35 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v2/buildLogs")
-@CrossOrigin(origins = "http://localhost:8080", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class LogControllerV2 {
 
-    @Autowired
-    private BuildLogsService logService;
+        @Autowired
+        private BuildLogsService logService;
 
-    @GetMapping(value = "/{id}/logs",
-            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamLogs(
-            @PathVariable("id") String buildId,
-            @RequestHeader(value = "Last-Event-ID", required = false)
-            String lastEventId
-    ) {
+        @GetMapping(value = "/{id}/logs", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+        public Flux<ServerSentEvent<String>> streamLogs(
+                        @PathVariable("id") String buildId,
+                        @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
 
-        System.out.println(buildId);
-        System.out.println(lastEventId);
+                System.out.println(buildId);
+                System.out.println(lastEventId);
 
                 return logService.streamLogs(buildId, lastEventId)
                                 .map(record -> {
 
-                                        String message = record.getValue().getOrDefault("log", record.getValue().get("message"));
+                                        String message = record.getValue().getOrDefault("log",
+                                                        record.getValue().get("message"));
                                         if (message == null) {
                                                 message = "";
                                         }
 
-                    return ServerSentEvent.<String>builder()
-                            .id(record.getId().getValue())
-                            .event("log")
-                            .data(message)
-                            .build();
-                });
-    }
+                                        return ServerSentEvent.<String>builder()
+                                                        .id(record.getId().getValue())
+                                                        .event("log")
+                                                        .data(message)
+                                                        .build();
+                                });
+        }
 
 }

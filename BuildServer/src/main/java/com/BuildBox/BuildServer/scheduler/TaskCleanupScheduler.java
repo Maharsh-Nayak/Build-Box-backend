@@ -21,7 +21,7 @@ public class TaskCleanupScheduler {
     @Value("${ecs.cluster.name:buildserver-cluster-1}")
     private String cluster;
 
-    @Value("${task.idle.timeout.seconds:300}")
+    @Value("${task.idle.timeout.seconds:120}")
     private long idleTimeoutSeconds;
 
     public TaskCleanupScheduler(TaskRegistry taskRegistry, EcsService ecsService,
