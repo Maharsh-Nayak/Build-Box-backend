@@ -33,6 +33,8 @@ public class RuntimeLogService {
 
         String streamKey = "runtime-logs:" + projectId;
 
+        System.out.println(streamKey);
+
         // History
         Flux<MapRecord<String, String, String>> history = redisTemplate.opsForStream()
                 .range(streamKey, Range.unbounded())
@@ -48,6 +50,8 @@ public class RuntimeLogService {
                 ? ReadOffset.from(lastEventId)
                 : ReadOffset.latest();
         Flux<MapRecord<String, String, String>> live = receiver.receive(StreamOffset.create(streamKey, offset));
+
+        System.out.println(live.log());
 
         return Flux.concat(history, live);
     }

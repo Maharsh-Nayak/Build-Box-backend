@@ -1,10 +1,21 @@
 package com.BuildBox.BuildServer.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.stream.Stream;
+
 @Service
 public class AsyncBuildExecutor {
+
+    @Value("${build.base.dir:/tmp/builds}")
+    private String BASE_DIR;
 
     private final BuildService buildService;
     private final DeploymentTrackingService tracker;
@@ -22,6 +33,23 @@ public class AsyncBuildExecutor {
             tracker.log(deploymentId, "❌ Build failed: " + e.getMessage());
             tracker.complete(deploymentId, false);
             logError(projectId, e);
+        }finally{
+            // deleting folder after completion as without it some error is coming of un-marsheling from aws sdk !
+            Path directoryToBeDeleted = Paths.get(BASE_DIR, projectId);
+
+            try (Stream<Path> paths = Files.walk(directoryToBeDeleted)) {
+                paths.sorted(Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                                System.out.println("Deleted: " + path.getFileName());
+                            } catch (IOException e) {
+                                System.err.println("Could not delete " + path.getFileName() + ": " + e.getMessage());
+                            }
+                        });
+            } catch (IOException e) {
+                System.err.println("Error during folder traversal: " + e.getMessage());
+            }
         }
     }
 

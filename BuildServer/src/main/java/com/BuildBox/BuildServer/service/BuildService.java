@@ -198,9 +198,6 @@ public class BuildService {
         tracker.setDeploymentUrl(deploymentId, projectId + ".localhost");
         tracker.complete(deploymentId, true);
 
-        // deleting folder after completion as without it some error is coming of un-marsheling from aws sdk !
-        Files.delete(Path.of(BASE_DIR, projectId));
-
         return taskArn;
     }
 }

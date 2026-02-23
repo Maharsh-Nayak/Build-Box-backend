@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v2/runtime")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "localhost:5173", allowedHeaders = "*")
 public class RuntimeLogController {
 
     @Autowired
@@ -19,6 +19,8 @@ public class RuntimeLogController {
     public Flux<ServerSentEvent<String>> streamRuntimeLogs(
             @PathVariable String projectId,
             @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
+
+        System.out.println(projectId);
 
         Flux<ServerSentEvent<String>> heartbeat = Flux.interval(java.time.Duration.ofSeconds(15))
                 .map(i -> ServerSentEvent.<String>builder()

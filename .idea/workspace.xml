@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="backend deployment added">
+    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="bug fixes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BuildServer/src/main/resources/application.properties.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/resources/application.properties.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Log_Analytics_Server/src/main/resources/application.properties.example" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,6 +175,8 @@
       <workItem from="1770635320165" duration="11000" />
       <workItem from="1770835963155" duration="132000" />
       <workItem from="1771579725401" duration="18000" />
+      <workItem from="1771788345499" duration="159000" />
+      <workItem from="1771824059429" duration="128000" />
     </task>
     <task id="LOCAL-00001" summary="Project Initialization">
       <option name="closed" value="true" />
@@ -269,7 +274,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770635304802</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="bug fixes">
+      <option name="closed" value="true" />
+      <created>1771788400684</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1771788400684</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -280,7 +293,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -297,7 +322,8 @@
     <MESSAGE value="implemented logs feature" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="backend deployment added" />
-    <option name="LAST_COMMIT_MESSAGE" value="backend deployment added" />
+    <MESSAGE value="bug fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="bug fixes" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
