@@ -65,6 +65,42 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{slug}/owner")
+    public ResponseEntity<?> getProjectOwner(@PathVariable String slug) {
+        return projectService.getBySlug(slug)
+                .map(project -> {
+                    User owner = project.getUser();
+                    if (owner != null) {
+                        return ResponseEntity.ok(Map.of(
+                            "userId", owner.getId(),
+                            "email", owner.getEmail(),
+                            "name", owner.getName()
+                        ));
+                    } else {
+                        return ResponseEntity.ok(Map.of("userId", "unknown"));
+                    }
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/by-name/{projectName}/owner")
+    public ResponseEntity<?> getProjectOwnerByName(@PathVariable String projectName) {
+        Project project = projectService.getByName(projectName);
+        if (project != null) {
+            User owner = project.getUser();
+            if (owner != null) {
+                return ResponseEntity.ok(Map.of(
+                    "userId", owner.getId(),
+                    "email", owner.getEmail(),
+                    "name", owner.getName()
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of("userId", "unknown"));
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PutMapping("/{slug}")
     public ResponseEntity<?> updateProject(@PathVariable String slug,
             @RequestBody Map<String, String> body,

@@ -1,6 +1,7 @@
 const httpProxy = require('http-proxy');
 const axios = require('axios');
 const redis = require('./redis');
+const analytics = require('./analytics');
 const config = require('../config');
 
 const proxy = httpProxy.createProxyServer({});
@@ -18,8 +19,26 @@ class ReverseProxy {
         this.proxy = proxy;
     }
 
+    async getProjectOwner(projectName) {
+        try {
+            if (!projectName || projectName === '') {
+                return 'unknown';
+            }
+
+            // Call the project API to get owner information by project name
+            const response = await axios.get(`${config.FRONTEND_SERVER_URL}/api/projects/by-name/${projectName}/owner`);
+            
+            // Return the owner's user ID
+            return response.data.userId?.toString() || 'unknown';
+        } catch (err) {
+            console.error(`[Proxy] Error fetching owner for project ${projectName}:`, err.message);
+            return 'unknown';
+        }
+    }
+
     async handleRequest(req, res) {
         const hostname = req.hostname;
+        const startTime = Date.now();
 
         // Handle Platform-level API calls (from Main UI)
         if (req.url.startsWith('/api') && (hostname === 'localhost' || hostname === '127.0.0.1')) {
@@ -29,20 +48,19 @@ class ReverseProxy {
         // Parse Hostname project subdomains
         let type = 'FRONTEND';
         let project = '';
-        let user = 'test-user';
+        let user = 'unknown'; // Will be populated after we know the project
 
         const parts = hostname.split('.');
 
         if (hostname.endsWith('buildbox.com')) {
-            // production pattern
+            // production pattern: api.project-name.buildbox.com OR project-name.buildbox.com
+            // Note: We don't use hostname-based user anymore, we look it up from project DB
             if (parts[0] === 'api') {
                 type = 'BACKEND';
                 project = parts[1];
-                user = parts[2];
             } else {
                 type = 'FRONTEND';
                 project = parts[0];
-                user = parts[1];
             }
         } else {
             // localhost / dev pattern
@@ -56,7 +74,40 @@ class ReverseProxy {
             }
         }
 
+        // Fetch project owner from database (works for both localhost and production)
+        if (project) {
+            user = await this.getProjectOwner(project);
+        }
+
         console.log(`[Proxy] Request: ${req.method} ${req.url} | Host: ${hostname} | Type: ${type} | Project: ${project} | User: ${user}`);
+
+        // Capture response to record analytics
+        const originalEnd = res.end;
+        res.end = function(...args) {
+            const durationMs = Date.now() - startTime;
+            const bytesIn = req.get('content-length') || 0;
+            const bytesOut = res.get('content-length') || 0;
+
+            // Record analytics event
+            analytics.recordEvent({
+                projectId: project,
+                accountId: user,
+                eventType: 'REQUEST',
+                path: req.url,
+                method: req.method,
+                statusCode: res.statusCode,
+                durationMs: durationMs,
+                bytesIn: parseInt(bytesIn) || 0,
+                bytesOut: parseInt(bytesOut) || 0,
+                source: type === 'FRONTEND' ? 'frontend' : 'backend',
+                ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+                userAgent: req.get('user-agent') || 'unknown'
+            }).catch(err => {
+                console.error('[Proxy] Error recording analytics:', err);
+            });
+
+            originalEnd.apply(res, args);
+        };
 
         if (type === 'FRONTEND') {
             await this.handleFrontendRequest(req, res, user, project);

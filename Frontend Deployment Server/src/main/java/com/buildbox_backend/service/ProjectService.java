@@ -57,6 +57,10 @@ public class ProjectService {
         return project;
     }
 
+    public Project getByName(String name) {
+        return projectRepository.findByName(name);
+    }
+
     public Optional<Project> getById(Long id) {
         return projectRepository.findById(id);
     }

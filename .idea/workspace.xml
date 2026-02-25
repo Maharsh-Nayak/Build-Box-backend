@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="bug fixes">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="integrated backend and frontend for user logs">
       <change beforePath="$PROJECT_DIR$/BuildServer/src/main/resources/application.properties.example" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/resources/application.properties.example" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Log_Analytics_Server/src/main/resources/application.properties.example" beforeDir="false" />
@@ -177,6 +176,7 @@
       <workItem from="1771579725401" duration="18000" />
       <workItem from="1771788345499" duration="159000" />
       <workItem from="1771824059429" duration="128000" />
+      <workItem from="1771827082256" duration="54000" />
     </task>
     <task id="LOCAL-00001" summary="Project Initialization">
       <option name="closed" value="true" />
@@ -282,7 +282,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771788400684</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="integrated backend and frontend for user logs">
+      <option name="closed" value="true" />
+      <created>1771827128764</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1771827128764</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,7 +331,8 @@
     <MESSAGE value="minor changes" />
     <MESSAGE value="backend deployment added" />
     <MESSAGE value="bug fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="bug fixes" />
+    <MESSAGE value="integrated backend and frontend for user logs" />
+    <option name="LAST_COMMIT_MESSAGE" value="integrated backend and frontend for user logs" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

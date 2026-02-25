@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v2/runtime")
-@CrossOrigin(origins = "localhost:5173", allowedHeaders = "*")
+//@CrossOrigin(origins = "localhost:5173", allowedHeaders = "*")
 public class RuntimeLogController {
 
     @Autowired
