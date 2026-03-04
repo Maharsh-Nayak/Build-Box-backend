@@ -54,6 +54,9 @@ public class TaskPortDiscoveryService {
 
                         // Register in task registry
                         taskRegistry.register(projectId, taskArn, runtime, host, port);
+                        
+                        // Note: Lifecycle tracking is now handled by EventBridge + Lambda
+                        
                         return taskRegistry.getTask(projectId);
                     }
                 }

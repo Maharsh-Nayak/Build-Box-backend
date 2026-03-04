@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class TaskRegistry {
 
     private static final String REDIS_KEY_PREFIX = "buildbox:task:";
+    private static final String REQUEST_COUNT_PREFIX = "buildbox:requests:";
     private final RedisTemplate<String, TaskInfo> redisTemplate;
 
     public TaskRegistry(RedisTemplate<String, TaskInfo> redisTemplate) {
@@ -47,6 +48,11 @@ public class TaskRegistry {
                     v.startedAt(),
                     Instant.now());
             redisTemplate.opsForValue().set(REDIS_KEY_PREFIX + projectId, updated, 24, TimeUnit.HOURS);
+            
+            // Increment request count in Redis (will be synced to DB periodically)
+            String requestKey = REQUEST_COUNT_PREFIX + v.taskArn();
+            redisTemplate.opsForValue().increment(requestKey);
+            redisTemplate.expire(requestKey, 24, TimeUnit.HOURS);
         }
     }
 

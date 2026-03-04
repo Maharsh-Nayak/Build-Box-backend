@@ -54,7 +54,7 @@ public class TaskCleanupScheduler {
             if (task == null)
                 return;
 
-            // 1. Stop ECS task
+            // 1. Stop ECS task (EventBridge will capture STOPPED event)
             ecsService.stopTask(cluster, task.taskArn(), "Idle timeout");
 
             // 2. Remove route

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="integrated backend and frontend for user logs">
+    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="Implemented phase 1 of analytics">
       <change beforePath="$PROJECT_DIR$/BuildServer/src/main/resources/application.properties.example" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/resources/application.properties.example" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Log_Analytics_Server/src/main/resources/application.properties.example" beforeDir="false" />
@@ -177,6 +177,7 @@
       <workItem from="1771788345499" duration="159000" />
       <workItem from="1771824059429" duration="128000" />
       <workItem from="1771827082256" duration="54000" />
+      <workItem from="1772013889939" duration="59000" />
     </task>
     <task id="LOCAL-00001" summary="Project Initialization">
       <option name="closed" value="true" />
@@ -290,7 +291,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771827128764</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Implemented phase 1 of analytics">
+      <option name="closed" value="true" />
+      <created>1772013936183</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1772013936183</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -332,7 +341,8 @@
     <MESSAGE value="backend deployment added" />
     <MESSAGE value="bug fixes" />
     <MESSAGE value="integrated backend and frontend for user logs" />
-    <option name="LAST_COMMIT_MESSAGE" value="integrated backend and frontend for user logs" />
+    <MESSAGE value="Implemented phase 1 of analytics" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented phase 1 of analytics" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

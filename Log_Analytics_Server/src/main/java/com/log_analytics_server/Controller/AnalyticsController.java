@@ -10,8 +10,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/api")
@@ -196,4 +198,77 @@ public class AnalyticsController {
             @RequestParam(defaultValue = "7") int days) {
         return analyticsService.getProjectAnalytics(slug, days);
     }
+
+    @GetMapping(value = "/analytics/account/timeseries", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Map<String, Object>> getAccountTimeSeriesAnalytics(
+            @RequestParam String accountId,
+            @RequestParam(defaultValue = "7") int days,
+            @RequestParam(defaultValue = "day") String interval) {
+
+        return analyticsService.getAccountAnalytics(accountId, days)
+                .collectList()
+                .map(events -> {
+                    Map<String, Object> result = new HashMap<>();
+                    
+                    // Choose formatter based on interval
+                    DateTimeFormatter formatter;
+                    if ("hour".equalsIgnoreCase(interval)) {
+                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
+                    } else {
+                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    }
+                    
+                    // Group events by time interval using TreeMap to keep it sorted
+                    Map<String, Long> timeSeriesData = new TreeMap<>();
+                    events.stream()
+                            .forEach(e -> {
+                                String timeKey = e.getTimestamp().format(formatter);
+                                timeSeriesData.merge(timeKey, 1L, Long::sum);
+                            });
+                    
+                    result.put("timeseries", timeSeriesData);
+                    result.put("interval", interval);
+                    result.put("accountId", accountId);
+                    result.put("totalRequests", events.size());
+                    
+                    return result;
+                });
+    }
+
+    @GetMapping(value = "/analytics/projects/{slug}/timeseries", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Map<String, Object>> getProjectTimeSeriesAnalytics(
+            @PathVariable String slug,
+            @RequestParam(defaultValue = "7") int days,
+            @RequestParam(defaultValue = "day") String interval) {
+
+        return analyticsService.getProjectAnalytics(slug, days)
+                .collectList()
+                .map(events -> {
+                    Map<String, Object> result = new HashMap<>();
+                    
+                    // Choose formatter based on interval
+                    DateTimeFormatter formatter;
+                    if ("hour".equalsIgnoreCase(interval)) {
+                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
+                    } else {
+                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    }
+                    
+                    // Group events by time interval using TreeMap to keep it sorted
+                    Map<String, Long> timeSeriesData = new TreeMap<>();
+                    events.stream()
+                            .forEach(e -> {
+                                String timeKey = e.getTimestamp().format(formatter);
+                                timeSeriesData.merge(timeKey, 1L, Long::sum);
+                            });
+                    
+                    result.put("timeseries", timeSeriesData);
+                    result.put("interval", interval);
+                    result.put("projectId", slug);
+                    result.put("totalRequests", events.size());
+                    
+                    return result;
+                });
+    }
 }
+

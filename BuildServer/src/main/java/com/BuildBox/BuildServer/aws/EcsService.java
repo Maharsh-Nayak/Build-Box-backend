@@ -98,12 +98,30 @@ public class EcsService {
 
         String taskDefArn = registerTaskDefinition(taskFamily, containerName, imageUri, projectId);
 
+        // Determine runtime from taskFamily (e.g., "user-node-task" -> "node")
+        String runtime = taskFamily.contains("node") ? "node" : 
+                        taskFamily.contains("python") ? "python" : "unknown";
+
         // Run task with EC2 launch type using new task definition
         RunTaskRequest request = RunTaskRequest.builder()
                 .cluster(cluster)
                 .taskDefinition(taskDefArn) // Use newly registered task def
                 .launchType(LaunchType.EC2) // ✅ EC2 launch type
                 .startedBy("buildserver-" + projectId) // For tracking
+                .tags(
+                    software.amazon.awssdk.services.ecs.model.Tag.builder()
+                        .key("ProjectId")
+                        .value(projectId)
+                        .build(),
+                    software.amazon.awssdk.services.ecs.model.Tag.builder()
+                        .key("Runtime")
+                        .value(runtime)
+                        .build(),
+                    software.amazon.awssdk.services.ecs.model.Tag.builder()
+                        .key("ManagedBy")
+                        .value("BuildBox")
+                        .build()
+                )
                 .build();
 
         RunTaskResponse response = ecs.runTask(request);

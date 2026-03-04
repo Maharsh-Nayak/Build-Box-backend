@@ -119,6 +119,9 @@ public class BuildController {
 
         ecsService.stopTask(cluster, task.taskArn(), "Stopped via API");
         routingBackend.removeRoute(projectId);
+        
+        // Note: EventBridge will capture the STOPPED event and update lifecycle
+        
         taskRegistry.removeTask(projectId);
 
         return ResponseEntity.ok(Map.of(
