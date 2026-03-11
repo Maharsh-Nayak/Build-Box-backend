@@ -45,6 +45,9 @@ public class DeployControllerV2 {
         String taskId = Ids.get("taskId");
 
         Optional<User> u = userRepository.findById(Long.valueOf(request.getUserId()));
+        if (u.isEmpty()) {
+            return ResponseEntity.status(401).body(Map.of("error", "User not found"));
+        }
         projectService.createProject(request.getProjectName(), request.getLink(), request.getFrontendDirectory(), u.get());
 
         return ResponseEntity.accepted().body(Map.of(

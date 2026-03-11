@@ -32,7 +32,7 @@ public class AuthController {
         User user = authService.signup(request.name, request.email, request.password);
 
         String token = authService.login(request.email, request.password);
-        return ResponseEntity.ok(new AuthResponse(token, request.name));
+        return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
     }
 
     // ---------- LOGIN ----------
@@ -40,7 +40,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         System.out.println("Login request: " + request.email + ", " + request.password);
         String token = authService.login(request.email, request.password);
-        return ResponseEntity.ok(new AuthResponse(token, request.email));
+        User user = userRepository.findByEmail(request.email).orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
     }
 
     // ---------- CURRENT USER ----------
