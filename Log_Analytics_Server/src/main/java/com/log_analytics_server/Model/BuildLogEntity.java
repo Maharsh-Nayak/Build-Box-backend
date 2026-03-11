@@ -11,6 +11,7 @@ public class BuildLogEntity {
     private Long id;
     private Long deploymentId;
     private String log;
+    private String type;
     private LocalDateTime timestamp;
 
     public Long getId() {
@@ -19,6 +20,14 @@ public class BuildLogEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Long getDeploymentId() {
