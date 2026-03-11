@@ -65,7 +65,8 @@ public class DeploymentService {
                     "projectId", project.getSlug(),
                     "runtime", "node",
                     "deploymentId", saved.getId(),
-                    "basePath", project.getBasePath());
+                    "basePath", project.getBasePath(),
+                    "repoUrl", project.getRepoUrl() != null ? project.getRepoUrl() : "");
             String endpoint = "/api/builds";
             if ("test-fullstack-app".equals(project.getSlug())) {
                 endpoint = "/api/builds/test-local";

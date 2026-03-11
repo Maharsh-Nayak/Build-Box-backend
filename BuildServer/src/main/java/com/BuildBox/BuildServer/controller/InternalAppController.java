@@ -67,10 +67,7 @@ public class InternalAppController {
 
         if (projectOpt.isPresent()) {
             System.out.println(projectOpt.get());
-            User userObj = projectOpt.get().getUser();
-            if (userObj != null) {
-                basePath = userObj.getId() + "/" + projectOpt.get().getName()+"/Backend";
-            }
+            basePath = projectOpt.get().getBasePath();
             // Optional: runtime could also be stored in DB, but slug-based inference is
             // okay for now
         }
@@ -78,8 +75,8 @@ public class InternalAppController {
         System.out.println("DEBUG: Cold start for " + project + " | basePath: " + basePath + " | runtime: " + runtime);
 
         // Trigger local build/start sequence with correct basePath
-//        executor.startBuildLocal(project, runtime, null, basePath);
-        executor.startBuild(project, runtime, null, basePath);
+//        executor.startBuildLocal(project, runtime, null, basePath, null);
+        executor.startBuild(project, runtime, null, basePath, null);
 
         return ResponseEntity.accepted().body(Map.of("status", "STARTING"));
     }

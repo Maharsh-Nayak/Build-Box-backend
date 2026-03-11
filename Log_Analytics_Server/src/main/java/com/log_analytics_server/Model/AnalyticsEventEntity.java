@@ -6,8 +6,10 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 import java.time.OffsetDateTime;
 
+import java.io.Serializable;
+
 @Table("analytics_events")
-public class AnalyticsEventEntity implements Persistable<String> {
+public class AnalyticsEventEntity implements Persistable<String>, Serializable {
 
     @Id
     private String id;

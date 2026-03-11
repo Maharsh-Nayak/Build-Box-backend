@@ -26,9 +26,9 @@ public class AsyncBuildExecutor {
     }
 
     @Async
-    public void startBuild(String projectId, String runtime, Long deploymentId, String basePath) {
+    public void startBuild(String projectId, String runtime, Long deploymentId, String basePath, String repoUrl) {
         try {
-            buildService.buildAndRun(projectId, runtime, deploymentId, basePath);
+            buildService.buildAndRun(projectId, runtime, deploymentId, basePath, repoUrl);
         } catch (Exception e) {
             tracker.log(deploymentId, "❌ Build failed: " + e.getMessage());
             tracker.complete(deploymentId, false);
@@ -54,9 +54,9 @@ public class AsyncBuildExecutor {
     }
 
     @Async
-    public void startBuildLocal(String projectId, String runtime, Long deploymentId, String basePath) {
+    public void startBuildLocal(String projectId, String runtime, Long deploymentId, String basePath, String repoUrl) {
         try {
-            buildService.buildAndRunLocal(projectId, runtime, deploymentId, basePath);
+            buildService.buildAndRunLocal(projectId, runtime, deploymentId, basePath, repoUrl);
         } catch (Exception e) {
             tracker.log(deploymentId, "❌ Build failed: " + e.getMessage());
             tracker.complete(deploymentId, false);
@@ -67,22 +67,22 @@ public class AsyncBuildExecutor {
     // Backwards-compatible overloads
     @Async
     public void startBuild(String projectId, String runtime, Long deploymentId) {
-        startBuild(projectId, runtime, deploymentId, null);
+        startBuild(projectId, runtime, deploymentId, null, null);
     }
 
     @Async
     public void startBuild(String projectId, String runtime) {
-        startBuild(projectId, runtime, null, null);
+        startBuild(projectId, runtime, null, null, null);
     }
 
     @Async
     public void startBuildLocal(String projectId, String runtime, Long deploymentId) {
-        startBuildLocal(projectId, runtime, deploymentId, null);
+        startBuildLocal(projectId, runtime, deploymentId, null, null);
     }
 
     @Async
     public void startBuildLocal(String projectId, String runtime) {
-        startBuildLocal(projectId, runtime, null, null);
+        startBuildLocal(projectId, runtime, null, null, null);
     }
 
     private void logError(String projectId, Exception e) {

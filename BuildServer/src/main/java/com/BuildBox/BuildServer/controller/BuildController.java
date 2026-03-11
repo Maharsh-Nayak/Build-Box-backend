@@ -55,7 +55,8 @@ public class BuildController {
                 request.getProjectId(),
                 request.getRuntime(),
                 request.getDeploymentId(),
-                request.getBasePath());
+                request.getBasePath(),
+                request.getRepoUrl());
 
         return new BuildResponse(
                 request.getProjectId(),
@@ -144,7 +145,8 @@ public class BuildController {
                 request.getProjectId(),
                 request.getRuntime(),
                 request.getDeploymentId(),
-                request.getBasePath());
+                request.getBasePath(),
+                request.getRepoUrl());
 
         return new BuildResponse(
                 request.getProjectId(),
