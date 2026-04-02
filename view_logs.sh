@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-LOG_DIR="Build-Box-backend"
+LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Help message
 show_help() {
