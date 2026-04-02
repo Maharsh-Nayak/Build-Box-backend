@@ -12,6 +12,7 @@ public class BuildRequest {
 
     private Long deploymentId; // Optional: links build to a deployment record
     private String basePath; // Optional: sub-directory within the project (e.g. "Backend")
+    private String repoUrl; // Optional: git repository URL to clone from
 
     public String getProjectId() {
         return projectId;
@@ -29,6 +30,10 @@ public class BuildRequest {
         return basePath;
     }
 
+    public String getRepoUrl() {
+        return repoUrl;
+    }
+
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
@@ -43,5 +48,9 @@ public class BuildRequest {
 
     public void setBasePath(String basePath) {
         this.basePath = basePath;
+    }
+
+    public void setRepoUrl(String repoUrl) {
+        this.repoUrl = repoUrl;
     }
 }

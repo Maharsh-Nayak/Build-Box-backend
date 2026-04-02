@@ -48,7 +48,7 @@ public class AlbRoutingBackend implements RoutingBackend {
 
         try {
             // Find project entity for priority allocation
-            Project project = projectRepository.findByName(projectId)
+            Project project = projectRepository.findBySlug(projectId)
                     .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
 
             // 1. Ensure Target Group exists

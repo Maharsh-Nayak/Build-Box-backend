@@ -60,40 +60,45 @@ public class BuildService {
      * Build Docker image and run as ECS task.
      * Returns the task ARN for tracking.
      */
-    public String buildAndRun(String projectId, String runtime, Long deploymentId, String basePath) throws Exception {
+    public String buildAndRun(String projectId, String runtime, Long deploymentId, String basePath, String repoUrl) throws Exception {
         Path projectDir = Path.of(BASE_DIR, projectId);
 
-        if (Files.exists(projectDir)) {
-            try (var walk = Files.walk(projectDir)) {
-                walk.sorted(java.util.Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                            } catch (Exception ignored) {}
-                        });
+        tracker.updateStatus(deploymentId, "BUILDING");
+
+        if (repoUrl != null && !repoUrl.isBlank()) {
+            tracker.log(deploymentId, "📥 Cloning source code from " + repoUrl + "...");
+            try {
+                if (Files.exists(projectDir)) {
+                    commandRunner.run("rm -rf \"" + projectDir.toAbsolutePath() + "\"");
+                }
+                commandRunner.run("git clone \"" + repoUrl + "\" \"" + projectDir.toAbsolutePath() + "\"");
+            } catch (Exception e) {
+                tracker.log(deploymentId, "❌ Git clone failed: " + e.getMessage());
+                throw e;
+            }
+        } else {
+            tracker.log(deploymentId, "📥 Downloading source code from S3...");
+            try{
+                s3.downloadDirectory(BUCKET, basePath, projectDir);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
 
-        Files.createDirectories(projectDir);
-
-        tracker.log(deploymentId, "📥 Downloading source code from S3...");
-        tracker.updateStatus(deploymentId, "BUILDING");
-
-        try{
-            s3.downloadDirectory(BUCKET, basePath, projectDir);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return buildFromDirectory(projectId, runtime, projectDir, deploymentId, null);
+        return buildFromDirectory(projectId, runtime, projectDir, deploymentId, basePath);
     }
 
     /**
      * Build from LOCAL code (skips S3 download) - for testing.
      */
-    public String buildAndRunLocal(String projectId, String runtime, Long deploymentId, String basePath)
+    public String buildAndRunLocal(String projectId, String runtime, Long deploymentId, String basePath, String repoUrl)
             throws Exception {
         Path projectDir = Path.of(BASE_DIR, projectId);
+
+        if (repoUrl != null && !repoUrl.isBlank() && !Files.exists(projectDir)) {
+             tracker.log(deploymentId, "📥 Cloning source code from " + repoUrl + "...");
+             commandRunner.run("git clone \"" + repoUrl + "\" \"" + projectDir.toAbsolutePath() + "\"");
+        }
 
         if (!Files.exists(projectDir)) {
             throw new RuntimeException("Project directory not found: " + projectDir);
@@ -108,19 +113,19 @@ public class BuildService {
     // Backwards-compatible overloads
     // Backwards-compatible overloads
     public String buildAndRun(String projectId, String runtime, Long deploymentId) throws Exception {
-        return buildAndRun(projectId, runtime, deploymentId, null);
+        return buildAndRun(projectId, runtime, deploymentId, null, null);
     }
 
     public String buildAndRun(String projectId, String runtime) throws Exception {
-        return buildAndRun(projectId, runtime, null, null);
+        return buildAndRun(projectId, runtime, null, null, null);
     }
 
     public String buildAndRunLocal(String projectId, String runtime, Long deploymentId) throws Exception {
-        return buildAndRunLocal(projectId, runtime, deploymentId, null);
+        return buildAndRunLocal(projectId, runtime, deploymentId, null, null);
     }
 
     public String buildAndRunLocal(String projectId, String runtime) throws Exception {
-        return buildAndRunLocal(projectId, runtime, null, null);
+        return buildAndRunLocal(projectId, runtime, null, null, null);
     }
 
     /**

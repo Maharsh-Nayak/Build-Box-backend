@@ -9,7 +9,6 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/v2/buildLogs")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class LogControllerV2 {
 
         @Autowired

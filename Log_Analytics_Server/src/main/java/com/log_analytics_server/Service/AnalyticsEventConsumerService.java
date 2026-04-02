@@ -88,10 +88,15 @@ public class AnalyticsEventConsumerService {
                     System.out.println("[AnalyticsEventConsumerService] SAVING entity to database: " + entity.getId() + " (projectId=" + entity.getProjectId() + ")");
                     return repository.save(entity)
                         .doOnSuccess(saved -> System.out.println("[AnalyticsEventConsumerService] ✅ DATABASE SAVE SUCCESSFUL: " + saved.getId()))
-                        .doOnError(error -> System.err.println("[AnalyticsEventConsumerService] ❌ DATABASE SAVE FAILED: " + error.getMessage() + " | " + error.getClass().getSimpleName()))
-                        .doOnError(error -> error.printStackTrace())
+                        .doOnError(error -> {
+                            if (error instanceof org.springframework.dao.DataIntegrityViolationException) {
+                                System.out.println("[AnalyticsEventConsumerService] ℹ️ Skipped duplicate event (already exists): " + entity.getId());
+                            } else {
+                                System.err.println("[AnalyticsEventConsumerService] ❌ DATABASE SAVE FAILED: " + error.getMessage() + " | " + error.getClass().getSimpleName());
+                                error.printStackTrace();
+                            }
+                        })
                         .onErrorResume(e -> {
-                            System.err.println("[AnalyticsEventConsumerService] Recovering from error, skipping this event");
                             return Mono.empty();
                         });
                 })
@@ -139,9 +144,17 @@ public class AnalyticsEventConsumerService {
         return Flux.concat(history, live)
                 .flatMap(entity -> repository.save(entity)
                     .doOnSuccess(saved -> System.out.println("[AnalyticsEventConsumerService] Successfully persisted event: " + saved.getId()))
-                    .doOnError(error -> System.err.println("[AnalyticsEventConsumerService] Failed to save event: " + error.getMessage() + " - " + error.getClass().getName()))
+                    .doOnError(error -> {
+                        if (error instanceof org.springframework.dao.DataIntegrityViolationException) {
+                            // Suppress stack trace for duplicate events during overlapping stream consumption
+                        } else {
+                            System.err.println("[AnalyticsEventConsumerService] Failed to save event: " + error.getMessage() + " - " + error.getClass().getName());
+                        }
+                    })
                     .onErrorResume(e -> {
-                        e.printStackTrace();
+                        if (!(e instanceof org.springframework.dao.DataIntegrityViolationException)) {
+                            e.printStackTrace();
+                        }
                         return Mono.empty();
                     })
                 );

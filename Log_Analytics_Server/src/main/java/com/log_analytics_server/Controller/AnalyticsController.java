@@ -17,7 +17,6 @@ import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/api")
-//@CrossOrigin(origins = "*")
 public class AnalyticsController {
 
     private final AnalyticsEventConsumerService analyticsService;

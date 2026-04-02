@@ -26,7 +26,7 @@ class ReverseProxy {
             }
 
             // Call the project API to get owner information by project name
-            const response = await axios.get(`${config.FRONTEND_SERVER_URL}/api/projects/by-name/${projectName}/owner`);
+            const response = await axios.get(`${config.FRONTEND_SERVER_URL}/api/projects/${projectName}/owner`);
             
             // Return the owner's user ID
             return response.data.userId?.toString() || 'unknown';

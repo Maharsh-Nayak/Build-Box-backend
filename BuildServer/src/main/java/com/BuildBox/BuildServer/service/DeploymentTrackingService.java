@@ -100,5 +100,7 @@ public class DeploymentTrackingService {
         String status = success ? "READY" : "FAILED";
         updateStatus(deploymentId, status);
         log(deploymentId, "Deployment " + (success ? "completed successfully ✅" : "failed ❌"));
+        // Final signal for Log Persistence Service
+        log(deploymentId, "BUILD_COMPLETED");
     }
 }

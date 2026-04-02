@@ -27,12 +27,7 @@ public class DeploymentService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    /**
-     * Create a new deployment for a project and trigger the build on the
-     * BuildServer.
-     */
-    public Deployment triggerDeployment(Project project, String branch, String commitId, String commitMessage) {
-        // Auto-increment version
+    public Deployment createDeploymentRecord(Project project, String branch, String commitId, String commitMessage) {
         int nextVersion = deploymentRepository.findTopByProjectIdOrderByVersionDesc(project.getId())
                 .map(d -> d.getVersion() + 1)
                 .orElse(1);
@@ -48,6 +43,21 @@ public class DeploymentService {
 
         Deployment saved = deploymentRepository.save(deployment);
         deploymentRepository.flush();
+        
+        activityService.log(
+                project.getUser() != null ? project.getUser().getId() : null,
+                project.getId(),
+                "Created deployment record v" + nextVersion);
+                
+        return saved;
+    }
+
+    /**
+     * Create a new deployment for a project and trigger the build on the
+     * BuildServer.
+     */
+    public Deployment triggerDeployment(Project project, String branch, String commitId, String commitMessage) {
+        Deployment saved = createDeploymentRecord(project, branch, commitId, commitMessage);
 
         // Trigger the build on BuildServer asynchronously
         try {
@@ -55,7 +65,8 @@ public class DeploymentService {
                     "projectId", project.getSlug(),
                     "runtime", "node",
                     "deploymentId", saved.getId(),
-                    "basePath", project.getBasePath());
+                    "basePath", project.getBasePath(),
+                    "repoUrl", project.getRepoUrl() != null ? project.getRepoUrl() : "");
             String endpoint = "/api/builds";
             if ("test-fullstack-app".equals(project.getSlug())) {
                 endpoint = "/api/builds/test-local";
@@ -71,11 +82,6 @@ public class DeploymentService {
             saved.setCompletedAt(LocalDateTime.now());
             deploymentRepository.save(saved);
         }
-
-        activityService.log(
-                project.getUser() != null ? project.getUser().getId() : null,
-                project.getId(),
-                "Triggered deployment v" + nextVersion);
 
         return saved;
     }
