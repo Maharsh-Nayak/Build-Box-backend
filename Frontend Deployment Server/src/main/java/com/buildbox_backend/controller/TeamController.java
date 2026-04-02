@@ -47,12 +47,12 @@ public class TeamController {
     }
 
     @GetMapping("/{id}/members")
-    public ResponseEntity<List<TeamMember>> listMembers(@PathVariable Long id) {
+    public ResponseEntity<List<TeamMember>> listMembers(@PathVariable("id") Long id) {
         return ResponseEntity.ok(teamService.getMembers(id));
     }
 
     @PostMapping("/{id}/members")
-    public ResponseEntity<?> addMember(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> addMember(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
         String email = body.get("email");
         String role = body.get("role");
 
@@ -70,7 +70,7 @@ public class TeamController {
     }
 
     @DeleteMapping("/{id}/members/{userId}")
-    public ResponseEntity<?> removeMember(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<?> removeMember(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         teamService.removeMember(id, userId);
         return ResponseEntity.ok(Map.of("message", "Member removed"));
     }

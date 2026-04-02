@@ -23,8 +23,8 @@ public class EnvVariableController {
     private ProjectService projectService;
 
     @GetMapping
-    public ResponseEntity<List<EnvVariable>> listEnvVars(@PathVariable String slug,
-            @RequestParam(required = false) String environment) {
+    public ResponseEntity<List<EnvVariable>> listEnvVars(@PathVariable("slug") String slug,
+            @RequestParam(name = "environment", required = false) String environment) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null)
             return ResponseEntity.notFound().build();
@@ -37,7 +37,7 @@ public class EnvVariableController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createEnvVar(@PathVariable String slug, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> createEnvVar(@PathVariable("slug") String slug, @RequestBody Map<String, String> body) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null)
             return ResponseEntity.notFound().build();
@@ -61,8 +61,8 @@ public class EnvVariableController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEnvVar(@PathVariable String slug,
-            @PathVariable Long id,
+    public ResponseEntity<?> updateEnvVar(@PathVariable("slug") String slug,
+            @PathVariable("id") Long id,
             @RequestBody Map<String, String> body) {
         return envVariableRepository.findById(id)
                 .map(env -> {
@@ -78,7 +78,7 @@ public class EnvVariableController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEnvVar(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<?> deleteEnvVar(@PathVariable("slug") String slug, @PathVariable("id") Long id) {
         envVariableRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Environment variable removed"));
     }

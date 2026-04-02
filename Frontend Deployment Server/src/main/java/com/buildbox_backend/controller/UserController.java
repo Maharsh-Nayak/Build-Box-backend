@@ -23,7 +23,7 @@ public class UserController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<User> me(@RequestParam String email){
+    public ResponseEntity<User> me(@RequestParam("email") String email){
 
         System.out.println(email);
 

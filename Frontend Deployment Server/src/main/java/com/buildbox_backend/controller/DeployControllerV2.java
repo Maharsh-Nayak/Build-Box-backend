@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @RestController
 @RequestMapping("/deployProject")
@@ -24,12 +25,14 @@ public class DeployControllerV2 {
     private ECSService ecsService;
     private ProjectService projectService;
     private UserRepository userRepository;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DeployControllerV2(ECSService ecsService, ProjectService projectService, UserRepository userRepository) {
+    public DeployControllerV2(ECSService ecsService, ProjectService projectService, UserRepository userRepository, JdbcTemplate jdbcTemplate) {
         this.ecsService = ecsService;
         this.projectService = projectService;
         this.userRepository = userRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PostMapping("/v2")
@@ -39,17 +42,47 @@ public class DeployControllerV2 {
         System.out.println(request.getUserId());
 
         Map<String, String> Ids = ecsService.startBuild(request.getLink(), request.getProjectName(),
-                request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory());
+                request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory(), request.getFrontendEnvVars(), request.getBackendEnvVars());
 
         String buildId = Ids.get("buildId");
         String taskId = Ids.get("taskId");
 
         Optional<User> u = userRepository.findById(Long.valueOf(request.getUserId()));
-        projectService.createProject(request.getProjectName(), request.getLink(), request.getFrontendDirectory(), u.get());
+        var createdProject = projectService.createProject(
+            request.getProjectName(),
+            request.getLink(),
+            request.getFrontendDirectory(),
+            u.get());
+
+        String slug = createdProject.getSlug();
+
+        // Save env vars to deployment_environments so BuildServer injects them at container start
+        if (request.getBackendEnvVars() != null) {
+
+
+            for(String key : request.getBackendEnvVars().keySet()) {
+                String value = request.getBackendEnvVars().get(key);
+                String name = key;
+
+                System.out.println("BACKEND_ENV_VARS: ");
+                System.out.println(name + " = " + value);
+
+                String environment = "BACKEND";
+                if (name != null && !name.isBlank() && value != null) {
+                    jdbcTemplate.update(
+                            "INSERT INTO deployment_environments (project_id, environment_type, key_name, key_value, is_secret, created_at, updated_at) " +
+                                    "VALUES (?, ?, ?, ?, false, NOW(), NOW()) " +
+                                    "ON CONFLICT (project_id, environment_type, key_name) DO UPDATE SET key_value = EXCLUDED.key_value, updated_at = NOW()",
+                            slug, environment, name, value
+                    );
+                }
+            }
+        }
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Deployment started",
                 "taskId", taskId,
-                "buildId", buildId));
+            "buildId", buildId,
+            "projectSlug", slug));
     }
 }

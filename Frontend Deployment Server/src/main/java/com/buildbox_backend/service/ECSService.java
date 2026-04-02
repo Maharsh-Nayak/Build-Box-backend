@@ -1,5 +1,7 @@
 package com.buildbox_backend.service;
 
+import com.buildbox_backend.repository.EnvVariableRepository;
+import io.lettuce.core.ScriptOutputType;
 import jakarta.servlet.annotation.WebServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class ECSService {
 
     private final EcsClient ecsClient;
+    private final EnvVariableRepository envVariableRepository;
 
 
     @Value("${aiven.hostName}")
@@ -27,12 +30,13 @@ public class ECSService {
     private String REDIS_PASSWORD;
 
     @Autowired
-    public ECSService(EcsClient ecsClient) {
+    public ECSService(EcsClient ecsClient, EnvVariableRepository envVariableRepository) {
         this.ecsClient = ecsClient;
         System.out.println("ECS Client created");
+        this.envVariableRepository = envVariableRepository;
     }
 
-    public Map<String, String> startBuild(String gitUrl, String projectName, String userId, String backendDir, String fonrtendDir) {
+    public Map<String, String> startBuild(String gitUrl, String projectName, String userId, String backendDir, String fonrtendDir, Map<String, String> customEnvs, Map<String, String> backendEnvVars) {
 
         System.out.println("Starting build");
 
@@ -49,24 +53,43 @@ public class ECSService {
                 .awsvpcConfiguration(vpcConfig)
                 .build();
 
+        List<KeyValuePair> envVars = new java.util.ArrayList<>(List.of(
+                KeyValuePair.builder().name("GIT_URL").value(gitUrl).build(),
+                KeyValuePair.builder().name("PROJECT_NAME").value(projectName).build(),
+                KeyValuePair.builder().name("USER_ID").value(userId).build(),
+                KeyValuePair.builder().name("FRONTENT_DIR").value(fonrtendDir).build(),
+                KeyValuePair.builder().name("BACKEND_DIR").value(backendDir).build(),
+                KeyValuePair.builder().name("BUILD_ID").value(buildId).build(),
+                KeyValuePair.builder().name("REDIS_HOST").value(REDIS_HOST).build(),
+                KeyValuePair.builder().name("REDIS_PORT").value("12608").build(),
+                KeyValuePair.builder().name("REDIS_PASSWORD").value(REDIS_PASSWORD).build()
+        ));
+
+        // 2. Dynamically add the custom frontend variables
+        if (customEnvs != null) {
+            System.out.println("Custom env variables: ");
+            customEnvs.forEach((key, value) -> {
+                System.out.println(key + " = " + value);
+                envVars.add(KeyValuePair.builder().name("FRONTEND_ENV_"+key.toString()).value(value).build());
+            });
+        }
+
+        if(backendEnvVars != null) {
+            backendEnvVars.forEach((key, value) -> {
+                envVars.add(KeyValuePair.builder().name("BACKEND_ENV_" + key.toString()).value(value).build());
+            });
+        }
+
         RunTaskRequest request = RunTaskRequest.builder()
                 .cluster("outstanding-gecko-uvkkj2")
-                .taskDefinition("BuildBoxDeploy:9")
+                .taskDefinition("BuildBoxDeploy:13")
                 .launchType(LaunchType.FARGATE)
                 .networkConfiguration(networkConfiguration)
         .overrides(TaskOverride.builder()
                 .containerOverrides(ContainerOverride.builder()
                         .name("InitialDeploy")
                         .environment(
-                                KeyValuePair.builder().name("GIT_URL").value(gitUrl).build(),
-                                KeyValuePair.builder().name("PROJECT_NAME").value(projectName).build(),
-                                KeyValuePair.builder().name("USER_ID").value(userId).build(),
-                                KeyValuePair.builder().name("FRONTENT_DIR").value(fonrtendDir).build(),
-                                KeyValuePair.builder().name("BACKEND_DIR").value(backendDir).build(),
-                                KeyValuePair.builder().name("BUILD_ID").value(buildId).build(),
-                                KeyValuePair.builder().name("REDIS_HOST").value(REDIS_HOST).build(),
-                                KeyValuePair.builder().name("REDIS_PORT").value("12608").build(),
-                                KeyValuePair.builder().name("REDIS_PASSWORD").value(REDIS_PASSWORD).build()
+                                envVars
                         )
                         .build())
                 .build())

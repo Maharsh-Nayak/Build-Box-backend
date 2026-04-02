@@ -23,7 +23,7 @@ public class DomainController {
     private ProjectService projectService;
 
     @GetMapping
-    public ResponseEntity<List<Domain>> listDomains(@PathVariable String slug) {
+    public ResponseEntity<List<Domain>> listDomains(@PathVariable("slug") String slug) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null)
             return ResponseEntity.notFound().build();
@@ -31,7 +31,7 @@ public class DomainController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addDomain(@PathVariable String slug, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> addDomain(@PathVariable("slug") String slug, @RequestBody Map<String, String> body) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null)
             return ResponseEntity.notFound().build();
@@ -55,7 +55,7 @@ public class DomainController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDomain(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<?> deleteDomain(@PathVariable("slug") String slug, @PathVariable("id") Long id) {
         domainRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Domain removed"));
     }

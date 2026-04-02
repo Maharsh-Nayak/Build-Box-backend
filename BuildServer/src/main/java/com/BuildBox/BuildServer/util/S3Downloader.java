@@ -65,6 +65,8 @@ public class S3Downloader {
                         System.out.println("Downloading " + getRequest);
 
                         try{
+                                Files.deleteIfExists(filePath);
+
                                 s3Client.getObject(getRequest, filePath);
                         } catch (Exception e) {
                                 throw new RuntimeException(e);

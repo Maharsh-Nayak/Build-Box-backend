@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="Implemented phase 1 of analytics">
-      <change beforePath="$PROJECT_DIR$/BuildServer/src/main/resources/application.properties.example" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/resources/application.properties.example" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Log_Analytics_Server/src/main/resources/application.properties.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend Deployment Server/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

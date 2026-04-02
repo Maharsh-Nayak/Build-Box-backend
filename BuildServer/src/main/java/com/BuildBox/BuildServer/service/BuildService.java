@@ -63,6 +63,19 @@ public class BuildService {
     public String buildAndRun(String projectId, String runtime, Long deploymentId, String basePath) throws Exception {
         Path projectDir = Path.of(BASE_DIR, projectId);
 
+        if (Files.exists(projectDir)) {
+            try (var walk = Files.walk(projectDir)) {
+                walk.sorted(java.util.Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (Exception ignored) {}
+                        });
+            }
+        }
+
+        Files.createDirectories(projectDir);
+
         tracker.log(deploymentId, "📥 Downloading source code from S3...");
         tracker.updateStatus(deploymentId, "BUILDING");
 

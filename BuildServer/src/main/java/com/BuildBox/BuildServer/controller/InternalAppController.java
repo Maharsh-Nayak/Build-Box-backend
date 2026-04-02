@@ -60,6 +60,13 @@ public class InternalAppController {
         // Look up project metadata from DB for correct runtime/basePath
 //        Optional<Project> projectOpt = projectRepository.findBySlug(project);
         System.out.println(project);
+
+        TaskInfo task = taskRegistry.getTask(project);
+
+        if (task != null && "RUNNING".equals(task.status())) {
+            return ResponseEntity.ok(Map.of("status", "ALREADY_RUNNING"));
+        }
+
         Optional<Project> projectOpt = projectRepository.findByName(project);
 
         String runtime = (project.contains("python") || project.contains("flask")) ? "python" : "node";

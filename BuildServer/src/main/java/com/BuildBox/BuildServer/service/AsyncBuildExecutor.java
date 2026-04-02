@@ -25,7 +25,7 @@ public class AsyncBuildExecutor {
         this.tracker = tracker;
     }
 
-    @Async
+//    @Async
     public void startBuild(String projectId, String runtime, Long deploymentId, String basePath) {
         try {
             buildService.buildAndRun(projectId, runtime, deploymentId, basePath);
@@ -33,23 +33,6 @@ public class AsyncBuildExecutor {
             tracker.log(deploymentId, "❌ Build failed: " + e.getMessage());
             tracker.complete(deploymentId, false);
             logError(projectId, e);
-        }finally{
-            // deleting folder after completion as without it some error is coming of un-marsheling from aws sdk !
-            Path directoryToBeDeleted = Paths.get(BASE_DIR, projectId);
-
-            try (Stream<Path> paths = Files.walk(directoryToBeDeleted)) {
-                paths.sorted(Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.delete(path);
-                                System.out.println("Deleted: " + path.getFileName());
-                            } catch (IOException e) {
-                                System.err.println("Could not delete " + path.getFileName() + ": " + e.getMessage());
-                            }
-                        });
-            } catch (IOException e) {
-                System.err.println("Error during folder traversal: " + e.getMessage());
-            }
         }
     }
 

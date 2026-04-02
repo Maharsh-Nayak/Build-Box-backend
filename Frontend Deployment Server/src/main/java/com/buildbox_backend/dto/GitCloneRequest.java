@@ -1,5 +1,7 @@
 package com.buildbox_backend.dto;
 
+import java.util.Map;
+
 public class GitCloneRequest {
 
     private String link;
@@ -7,14 +9,34 @@ public class GitCloneRequest {
     private String userId;
     private String frontendDirectory;
     private String backendDirectory;
+    Map<String, String> frontendEnvVars;
+    Map<String, String> backendEnvVars;
 
 
-    public GitCloneRequest(String link, String projectName, String userId, String frontendDirectory, String backendDirectory) {
+    public GitCloneRequest(String link, String projectName, String userId, String frontendDirectory, String backendDirectory, Map<String, String> customEnvs, Map<String, String> backendEnvVariables) {
         this.link = link;
         this.projectName = projectName;
         this.userId = userId;
         this.frontendDirectory = frontendDirectory;
         this.backendDirectory = backendDirectory;
+        this.frontendEnvVars = customEnvs;
+        this.backendEnvVars = backendEnvVariables;
+    }
+
+    public Map<String, String> getBackendEnvVars() {
+        return backendEnvVars;
+    }
+
+    public void setBackendEnvVars(Map<String, String> backendEnvVars) {
+        this.backendEnvVars = backendEnvVars;
+    }
+
+    public Map<String, String> getFrontendEnvVars() {
+        return frontendEnvVars;
+    }
+
+    public void setFrontendEnvVars(Map<String, String> frontendEnvVars) {
+        this.frontendEnvVars = frontendEnvVars;
     }
 
     public GitCloneRequest() {}

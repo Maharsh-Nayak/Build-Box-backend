@@ -12,7 +12,7 @@ public class CorsConfig implements WebFluxConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173") // Put your frontend URL here
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowedHeaders("*");
+//                .allowCredentials(true);
     }
 }

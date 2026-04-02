@@ -56,7 +56,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<?> getProject(@PathVariable String slug, Authentication auth) {
+    public ResponseEntity<?> getProject(@PathVariable("slug") String slug, Authentication auth) {
 
         System.out.println("Slug: " + slug);
 
@@ -66,7 +66,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{slug}/owner")
-    public ResponseEntity<?> getProjectOwner(@PathVariable String slug) {
+    public ResponseEntity<?> getProjectOwner(@PathVariable("slug") String slug) {
         return projectService.getBySlug(slug)
                 .map(project -> {
                     User owner = project.getUser();
@@ -84,7 +84,7 @@ public class ProjectController {
     }
 
     @GetMapping("/by-name/{projectName}/owner")
-    public ResponseEntity<?> getProjectOwnerByName(@PathVariable String projectName) {
+    public ResponseEntity<?> getProjectOwnerByName(@PathVariable("projectName") String projectName) {
         Project project = projectService.getByName(projectName);
         if (project != null) {
             User owner = project.getUser();
@@ -102,7 +102,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{slug}")
-    public ResponseEntity<?> updateProject(@PathVariable String slug,
+    public ResponseEntity<?> updateProject(@PathVariable("slug") String slug,
             @RequestBody Map<String, String> body,
             Authentication auth) {
         return projectService.getBySlug(slug)
@@ -115,7 +115,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{slug}")
-    public ResponseEntity<?> deleteProject(@PathVariable String slug, Authentication auth) {
+    public ResponseEntity<?> deleteProject(@PathVariable("slug") String slug, Authentication auth) {
         return projectService.getBySlug(slug)
                 .map(project -> {
                     projectService.deleteProject(project.getId());

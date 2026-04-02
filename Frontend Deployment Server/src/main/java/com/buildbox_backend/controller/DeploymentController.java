@@ -37,7 +37,7 @@ public class DeploymentController {
     }
 
     @PostMapping("/projects/{slug}/deployments")
-    public ResponseEntity<?> triggerDeployment(@PathVariable String slug,
+    public ResponseEntity<?> triggerDeployment(@PathVariable("slug") String slug,
             @RequestBody(required = false) Map<String, String> body) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null) {
@@ -53,7 +53,7 @@ public class DeploymentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Deployment>> listDeployments(@PathVariable String slug) {
+    public ResponseEntity<List<Deployment>> listDeployments(@PathVariable("slug") String slug) {
         Project project = projectService.getBySlug(slug).orElse(null);
         if (project == null)
             return ResponseEntity.notFound().build();
@@ -62,15 +62,15 @@ public class DeploymentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getDeployment(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<?> getDeployment(@PathVariable("slug") String slug, @PathVariable("id") Long id) {
         return deploymentService.getById(id)
                 .map(d -> ResponseEntity.ok((Object) d))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/projects/{slug}/deployments/{id}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable String slug,
-            @PathVariable Long id,
+    public ResponseEntity<?> updateStatus(@PathVariable("slug") String slug,
+            @PathVariable("id") Long id,
             @RequestBody Map<String, String> body) {
         String status = body.get("status");
         if (status == null)

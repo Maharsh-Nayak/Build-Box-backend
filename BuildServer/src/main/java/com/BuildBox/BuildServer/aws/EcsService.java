@@ -1,5 +1,10 @@
 package com.BuildBox.BuildServer.aws;
 
+import com.BuildBox.BuildServer.model.DeploymentEnvironment;
+import com.BuildBox.BuildServer.service.DeploymentEnvironmentService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
@@ -14,10 +19,12 @@ public class EcsService {
 
     private final EcsClient ecs;
     private final Ec2Client ec2;
+    private final DeploymentEnvironmentService envService;
 
-    public EcsService(EcsClient ecs, Ec2Client ec2) {
+    public EcsService(EcsClient ecs, Ec2Client ec2, DeploymentEnvironmentService envService) {
         this.ecs = ecs;
         this.ec2 = ec2;
+        this.envService = envService;
     }
 
     // ... existing RunTask method ...
@@ -96,7 +103,11 @@ public class EcsService {
         // Note: AWS ECS ContainerOverride does NOT support changing the image.
         // We must register a new task definition revision with the user's image.
 
-        String taskDefArn = registerTaskDefinition(taskFamily, containerName, imageUri, projectId);
+        Map<String, String> userEnvVars = envService.getEnvironmentVariablesAsMap(
+            projectId, DeploymentEnvironment.EnvironmentType.BACKEND);
+        System.out.println("📝 Injecting " + userEnvVars.size() + " env vars for project: " + projectId);
+
+        String taskDefArn = registerTaskDefinition(taskFamily, containerName, imageUri, projectId, userEnvVars);
 
         // Determine runtime from taskFamily (e.g., "user-node-task" -> "node")
         String runtime = taskFamily.contains("node") ? "node" : 
@@ -166,7 +177,13 @@ public class EcsService {
      * Register a new task definition revision with the user's image.
      * This is required because ContainerOverride does not support changing images.
      */
-    private String registerTaskDefinition(String family, String containerName, String imageUri, String projectId) {
+    private String registerTaskDefinition(String family, String containerName, String imageUri, String projectId, Map<String, String> userEnvVars) {
+
+        // Build environment variable list
+        List<KeyValuePair> envVarList = new ArrayList<>();
+        if (userEnvVars != null) {
+            userEnvVars.forEach((k, v) -> envVarList.add(KeyValuePair.builder().name(k).value(v).build()));
+        }
 
         // Define the container with the user's image
         ContainerDefinition container = ContainerDefinition.builder()
@@ -175,6 +192,7 @@ public class EcsService {
                 .memory(256) // 256 MB
                 .cpu(128) // 0.125 vCPU
                 .essential(true)
+                .environment(envVarList)
                 .portMappings(PortMapping.builder()
                         .containerPort(containerName.contains("node") ? 3000 : 5000) // Node=3000, Python=5000
                         .hostPort(0) // Dynamic port mapping for bridge mode

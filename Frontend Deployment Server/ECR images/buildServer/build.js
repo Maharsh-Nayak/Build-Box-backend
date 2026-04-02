@@ -79,6 +79,20 @@ async function main() {
         await pushLog('➡️  STEP: INSTALL_FRONTEND_DEPS');
         await executeCommand('npm', ['install'], frontendDir);
 
+        await pushLog('➡️  STEP: GENERATING_FRONTEND_ENV');
+        const fs = require('fs');
+
+        // Filter all env vars that start with VITE_
+        const frontendEnvContent = Object.keys(process.env)
+            .filter(key => key.startsWith('FRONTEND_ENV_'))
+            .map(key => `${key.slice(13)}=${process.env[key]}`)
+            .join('\n');
+
+        if (frontendEnvContent) {
+            fs.writeFileSync(path.join(frontendDir, '.env'), frontendEnvContent);
+            await pushLog('✅ Created .env file with custom variables');
+        }
+
         // 3. Build Frontend
         await pushLog('➡️  STEP: BUILD_FRONTEND');
         await executeCommand('npm', ['run', 'build', '--', '--base=./'], frontendDir);
@@ -95,6 +109,20 @@ async function main() {
         // 5. Install Backend Deps
         await pushLog('➡️  STEP: INSTALL_BACKEND_DEPS');
         await executeCommand('npm', ['install'], backendDir);
+
+        await pushLog('➡️  STEP: GENERATING_BACKEND_ENV');
+        const fs2 = require('fs');
+
+        // Filter all env vars that start with VITE_
+        const backendEnvContent = Object.keys(process.env)
+            .filter(key => key.startsWith('BACKEND_ENV_'))
+            .map(key => `${key.slice(12)}=${process.env[key]}`)
+            .join('\n');
+
+        if (backendEnvContent) {
+            fs2.writeFileSync(path.join(backendDir, '.env'), backendEnvContent);
+            await pushLog('✅ Created .env file with custom variables for backend');
+        }
 
         // 6. Upload Backend
         await pushLog('➡️  STEP: UPLOAD_BACKEND');
