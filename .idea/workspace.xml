@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="Implemented phase 1 of analytics">
+    <list default="true" id="c438dc8f-cdf6-48e8-b1b4-4b2c359608a8" name="Changes" comment="Implemented env">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend Deployment Server/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend Deployment Server/src/main/java/com/buildbox_backend/controller/DeployControllerV2.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,6 +176,7 @@
       <workItem from="1771824059429" duration="128000" />
       <workItem from="1771827082256" duration="54000" />
       <workItem from="1772013889939" duration="59000" />
+      <workItem from="1775150164816" duration="431000" />
     </task>
     <task id="LOCAL-00001" summary="Project Initialization">
       <option name="closed" value="true" />
@@ -298,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772013936183</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Implemented env">
+      <option name="closed" value="true" />
+      <created>1775150201699</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1775150201699</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,7 +349,8 @@
     <MESSAGE value="bug fixes" />
     <MESSAGE value="integrated backend and frontend for user logs" />
     <MESSAGE value="Implemented phase 1 of analytics" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented phase 1 of analytics" />
+    <MESSAGE value="Implemented env" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented env" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
