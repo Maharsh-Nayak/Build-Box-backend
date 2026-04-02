@@ -150,27 +150,77 @@ public class AlbRoutingBackend implements RoutingBackend {
     private void ensureListenerRule(String tgArn, String hostHeader, Project project) {
         DescribeRulesResponse rulesResponse = elb.describeRules(r -> r.listenerArn(LISTENER_ARN));
 
+        // Check if a rule with the exact host header already exists
         boolean ruleExists = rulesResponse.rules().stream()
                 .flatMap(rule -> rule.conditions().stream())
                 .filter(c -> "host-header".equals(c.field()))
                 .anyMatch(c -> c.hostHeaderConfig().values().contains(hostHeader));
 
-        if (!ruleExists) {
-            // Allocate deterministic priority using our new service
-            int priority = priorityService.allocatePriority(LISTENER_ARN, project);
-
-            elb.createRule(r -> r
-                    .listenerArn(LISTENER_ARN)
-                    .priority(priority)
-                    .conditions(RuleCondition.builder()
-                            .field("host-header")
-                            .hostHeaderConfig(HostHeaderConditionConfig.builder().values(hostHeader).build())
-                            .build())
-                    .actions(Action.builder()
-                            .type(ActionTypeEnum.FORWARD)
-                            .targetGroupArn(tgArn)
-                            .build()));
+        if (ruleExists) {
+            System.out.println("✅ ALB: Listener rule already exists for " + hostHeader);
+            return;
         }
+
+        // Allocate deterministic priority using our service
+        int priority = priorityService.allocatePriority(LISTENER_ARN, project);
+
+        try {
+            createListenerRule(tgArn, hostHeader, priority);
+        } catch (PriorityInUseException e) {
+            // A stale rule with the same priority exists on AWS — clean it up and retry
+            System.out.println("⚠️ ALB: Priority " + priority + " is stale on AWS. Cleaning up...");
+            deleteStaleRuleByPriority(rulesResponse, priority);
+            createListenerRule(tgArn, hostHeader, priority);
+            System.out.println("✅ ALB: Stale rule cleaned and new rule created at priority " + priority);
+        }
+    }
+
+    private void createListenerRule(String tgArn, String hostHeader, int priority) {
+        elb.createRule(r -> r
+                .listenerArn(LISTENER_ARN)
+                .priority(priority)
+                .conditions(RuleCondition.builder()
+                        .field("host-header")
+                        .hostHeaderConfig(HostHeaderConditionConfig.builder().values(hostHeader).build())
+                        .build())
+                .actions(Action.builder()
+                        .type(ActionTypeEnum.FORWARD)
+                        .targetGroupArn(tgArn)
+                        .build()));
+    }
+
+    /**
+     * Finds and deletes a stale ALB listener rule by its priority number.
+     * This handles the case where a previous deployment left an orphaned rule on AWS
+     * that no longer matches the current host header but occupies the same priority slot.
+     */
+    private void deleteStaleRuleByPriority(DescribeRulesResponse rulesResponse, int priority) {
+        String targetPriority = String.valueOf(priority);
+
+        rulesResponse.rules().stream()
+                .filter(rule -> targetPriority.equals(rule.priority()))
+                .findFirst()
+                .ifPresentOrElse(
+                        staleRule -> {
+                            System.out.println("🗑️ ALB: Deleting stale rule: " + staleRule.ruleArn()
+                                    + " (priority " + priority + ")");
+                            elb.deleteRule(r -> r.ruleArn(staleRule.ruleArn()));
+                            System.out.println("✅ ALB: Stale rule deleted successfully");
+                        },
+                        () -> {
+                            // The rule wasn't in our cached response — re-fetch and try again
+                            System.out.println("⚠️ ALB: Stale rule not in cached response, re-fetching...");
+                            DescribeRulesResponse freshRules = elb.describeRules(
+                                    r -> r.listenerArn(LISTENER_ARN));
+                            freshRules.rules().stream()
+                                    .filter(rule -> targetPriority.equals(rule.priority()))
+                                    .findFirst()
+                                    .ifPresent(staleRule -> {
+                                        System.out.println("🗑️ ALB: Deleting stale rule: " + staleRule.ruleArn());
+                                        elb.deleteRule(r -> r.ruleArn(staleRule.ruleArn()));
+                                        System.out.println("✅ ALB: Stale rule deleted successfully");
+                                    });
+                        });
     }
 
     @Override
