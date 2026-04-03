@@ -75,14 +75,21 @@ async function main() {
         const frontendDir = path.join(repoDir, process.env.FRONTENT_DIR || 'frontend'); // Safety fallback
         const backendDir = path.join(repoDir, process.env.BACKEND_DIR || 'backend');
 
-        // 2. Install Frontend Deps
-        await pushLog('➡️  STEP: INSTALL_FRONTEND_DEPS');
-        await executeCommand('npm', ['install'], frontendDir);
+        const fs = require('fs');
+        const frontendPkgPath = path.join(frontendDir, 'package.json');
+        const hasPkgJson = fs.existsSync(frontendPkgPath);
+
+        // 2. Install Frontend Deps (only if package.json exists)
+        if (hasPkgJson) {
+            await pushLog('➡️  STEP: INSTALL_FRONTEND_DEPS');
+            await executeCommand('npm', ['install'], frontendDir);
+        } else {
+            await pushLog('➡️  STEP: INSTALL_FRONTEND_DEPS (SKIPPED — no package.json, treating as static site)');
+        }
 
         await pushLog('➡️  STEP: GENERATING_FRONTEND_ENV');
-        const fs = require('fs');
 
-        // Filter all env vars that start with VITE_
+        // Filter all env vars that start with FRONTEND_ENV_
         const frontendEnvContent = Object.keys(process.env)
             .filter(key => key.startsWith('FRONTEND_ENV_'))
             .map(key => `${key.slice(13)}=${process.env[key]}`)
@@ -93,15 +100,31 @@ async function main() {
             await pushLog('✅ Created .env file with custom variables');
         }
 
-        // 3. Build Frontend
-        await pushLog('➡️  STEP: BUILD_FRONTEND');
-        await executeCommand('npm', ['run', 'build', '--', '--base=./'], frontendDir);
+        // 3. Build Frontend (only if package.json has a "build" script)
+        let hasBuildScript = false;
+        if (hasPkgJson) {
+            try {
+                const pkg = JSON.parse(fs.readFileSync(frontendPkgPath, 'utf-8'));
+                hasBuildScript = !!(pkg.scripts && pkg.scripts.build);
+            } catch (e) {
+                await pushLog('⚠️  Could not parse package.json, skipping build step');
+            }
+        }
+
+        if (hasBuildScript) {
+            await pushLog('➡️  STEP: BUILD_FRONTEND');
+            await executeCommand('npm', ['run', 'build', '--', '--base=./'], frontendDir);
+        } else {
+            await pushLog('➡️  STEP: BUILD_FRONTEND (SKIPPED — no build script found, uploading as-is)');
+        }
 
         // 4. Upload Frontend
         await pushLog('➡️  STEP: UPLOAD_FRONTEND');
+        // If a build was run, upload from dist/. Otherwise upload the raw directory.
+        const uploadDir = hasBuildScript ? 'dist/' : './';
         // Using AWS CLI via spawn is perfectly fine and often simpler than AWS SDK for "sync"
         await executeCommand('aws', [
-            's3', 'sync', 'dist/',
+            's3', 'sync', uploadDir,
             `s3://buildbox-frontend/${process.env.USER_ID}/${process.env.PROJECT_NAME}/Frontend`,
             '--delete'
         ], frontendDir);

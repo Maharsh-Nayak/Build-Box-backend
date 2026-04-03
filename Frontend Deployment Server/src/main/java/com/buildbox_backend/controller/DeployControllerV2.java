@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import com.buildbox_backend.service.DeploymentService;
 
 @RestController
 @RequestMapping("/deployProject")
@@ -26,13 +27,15 @@ public class DeployControllerV2 {
     private ProjectService projectService;
     private UserRepository userRepository;
     private JdbcTemplate jdbcTemplate;
+    private DeploymentService deploymentService;
 
     @Autowired
-    public DeployControllerV2(ECSService ecsService, ProjectService projectService, UserRepository userRepository, JdbcTemplate jdbcTemplate) {
+    public DeployControllerV2(ECSService ecsService, ProjectService projectService, UserRepository userRepository, JdbcTemplate jdbcTemplate, DeploymentService deploymentService) {
         this.ecsService = ecsService;
         this.projectService = projectService;
         this.userRepository = userRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.deploymentService = deploymentService;
     }
 
     @PostMapping("/v2")
@@ -78,6 +81,9 @@ public class DeployControllerV2 {
                 }
             }
         }
+
+        // Trigger the backend deployment via BuildServer
+        deploymentService.triggerDeployment(createdProject, "main", "initial-commit", "Initial deployment from UI");
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Deployment started",

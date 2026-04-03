@@ -25,23 +25,36 @@ public class AuthController {
 
     // ---------- SIGNUP ----------
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
 
         System.out.println("Signup request: " + request);
 
-        User user = authService.signup(request.name, request.email, request.password);
+        try {
+            User user = authService.signup(request.name, request.email, request.password);
 
-        String token = authService.login(request.email, request.password);
-        return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
+            String token = authService.login(request.email, request.password);
+            return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 
     // ---------- LOGIN ----------
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         System.out.println("Login request: " + request.email + ", " + request.password);
-        String token = authService.login(request.email, request.password);
-        User user = userRepository.findByEmail(request.email).orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
+        try {
+            String token = authService.login(request.email, request.password);
+            User user = userRepository.findByEmail(request.email).orElseThrow(() -> new RuntimeException("User not found"));
+            return ResponseEntity.ok(new AuthResponse(token, request.email, user.getId()));
+        } catch (RuntimeException e) {
+            if ("User not found".equals(e.getMessage())) {
+                return ResponseEntity.status(404).body(e.getMessage());
+            } else if ("Invalid credentials".equals(e.getMessage())) {
+                return ResponseEntity.status(401).body(e.getMessage());
+            }
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 
     // ---------- CURRENT USER ----------
