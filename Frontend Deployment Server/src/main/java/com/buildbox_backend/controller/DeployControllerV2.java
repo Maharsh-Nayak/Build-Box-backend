@@ -54,7 +54,7 @@ public class DeployControllerV2 {
         var createdProject = projectService.createProject(
             request.getProjectName(),
             request.getLink(),
-            request.getFrontendDirectory(),
+            request.getBackendDirectory(), // Fix: Pass backend directory for BuildServer context
             u.get());
 
         String slug = createdProject.getSlug();
