@@ -1,23 +1,46 @@
-spring.application.name=BuildBox_Log_Analytics
-server.port=9012
+spring.application.name=BuildBox_backend
+server.port=${SERVER_PORT:9012}
 
-# R2DBC PostgreSQL
-spring.r2dbc.url=r2dbc:postgresql://YOUR_DB_HOST:5432/postgres
-spring.r2dbc.username=postgres
-spring.r2dbc.password=YOUR_DB_PASSWORD
+# =========================
+# DB (R2DBC for reactive access)
+# =========================
+spring.r2dbc.url=${SPRING_R2DBC_URL:r2dbc:postgresql://<SUPABASE_HOST>:5432/postgres}
+spring.r2dbc.username=${SPRING_R2DBC_USERNAME:<SUPABASE_USERNAME>}
+spring.r2dbc.password=${SPRING_R2DBC_PASSWORD:<SUPABASE_PASSWORD>}
+spring.r2dbc.pool.initial-size=2
+spring.r2dbc.pool.max-size=5
 
-# OAuth
-spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID
-spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET
-spring.security.oauth2.client.registration.github.client-id=YOUR_CLIENT_ID
-spring.security.oauth2.client.registration.github.client-secret=YOUR_CLIENT_SECRET
+# =========================
+# GOOGLE OAUTH
+# =========================
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID:<YOUR_GOOGLE_CLIENT_ID>}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET:<YOUR_GOOGLE_CLIENT_SECRET>}
+spring.security.oauth2.client.registration.google.redirect-uri=${OAUTH_REDIRECT_BASE_URL:http://localhost:9000}/login/oauth2/code/{registrationId}
+spring.security.oauth2.client.registration.google.scope=email,profile
 
+# =========================
+# GITHUB OAUTH
+# =========================
+spring.security.oauth2.client.registration.github.client-id=${GITHUB_CLIENT_ID:<YOUR_GITHUB_CLIENT_ID>}
+spring.security.oauth2.client.registration.github.client-secret=${GITHUB_CLIENT_SECRET:<YOUR_GITHUB_CLIENT_SECRET>}
+spring.security.oauth2.client.registration.github.scope=user:email
+
+# =========================
 # JWT
-jwt.sercetkey=YOUR_JWT_SECRET
+# =========================
+jwt.sercetkey=${JWT_SECRET:<YOUR_JWT_SECRET>}
 
-# Redis
-spring.data.redis.host=YOUR_REDIS_HOST
-spring.data.redis.port=12608
-spring.data.redis.password=YOUR_REDIS_PASSWORD
-spring.data.redis.username=default
+# =========================
+# CORS
+# =========================
+cors.allowed.origins=${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:8080}
+
+# =========================
+# Redis/Valkey
+# =========================
+spring.data.redis.host=${REDIS_HOST:<AIVEN_REDIS_HOST>}
+spring.data.redis.port=${REDIS_PORT:12608}
+spring.data.redis.password=${REDIS_PASSWORD:<AIVEN_REDIS_PASSWORD>}
+spring.data.redis.username=${REDIS_USERNAME:default}
 spring.data.redis.ssl.enabled=true
+spring.data.redis.repositories.enabled=false

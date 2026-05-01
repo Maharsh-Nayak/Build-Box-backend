@@ -1,41 +1,75 @@
 spring.application.name=BuildServer
-server.port=9191
+server.port=${SERVER_PORT:9191}
 
+# =========================
 # AWS Configuration
-aws.region=ap-south-1
+# =========================
+aws.region=${AWS_REGION:ap-south-1}
 
 # ECS Configuration
-ecs.cluster.name=buildserver-cluster-1
-ecs.subnet.id=YOUR_SUBNET_ID
-ecs.security.group.id=YOUR_SG_ID
+ecs.cluster.name=${ECS_CLUSTER_NAME:<YOUR_ECS_CLUSTER_NAME>}
+ecs.subnet.id=${ECS_SUBNET_ID:<YOUR_SUBNET_ID>}
+ecs.security.group.id=${ECS_SECURITY_GROUP_ID:<YOUR_SECURITY_GROUP_ID>}
 
 # ALB Configuration
 routing.backend=alb
-routing.alb.arn=YOUR_ALB_ARN
-routing.alb.listener.arn=YOUR_LISTENER_ARN
-routing.alb.dns.host=buildbox.com
+routing.alb.arn=${ALB_ARN:<YOUR_ALB_ARN>}
+routing.alb.listener.arn=${ALB_LISTENER_ARN:<YOUR_ALB_LISTENER_ARN>}
+
+# Platform DNS root (set to buildbox.tech on EC2)
+routing.alb.dns.host=${PLATFORM_DOMAIN:localhost}
 
 # S3 Configuration
-s3.bucket.name=YOUR_BUCKET_NAME
+s3.bucket.name=${S3_BUCKET_NAME:buildbox-frontend}
+
+# Build Configuration
+build.base.dir=${BUILD_BASE_DIR:/home/ec2-user/buildbox/BuildServer/builds}
+build.dockerfiles.dir=${BUILD_DOCKERFILES_DIR:/home/ec2-user/buildbox/BuildServer/dockerfiles}
 
 # ECR Configuration
-ecr.registry.uri=YOUR_ECR_URI
-ecr.repository.name=buildbox/buildserver
+ecr.registry.uri=${ECR_REGISTRY_URI:<YOUR_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com}
+ecr.repository.name=${ECR_REPOSITORY_NAME:buildbox/buildserver}
 
-# Credentials (Placeholder)
-aws.s3.accessKey=YOUR_ACCESS_KEY
-aws.s3.secretKey=YOUR_SECRET_KEY
-aws.ecs.accessKey=YOUR_ACCESS_KEY
-aws.ecs.secretKey=YOUR_SECRET_KEY
+# =========================
+# AWS Credentials
+# NOTE: On EC2 with an IAM Role attached, these can be left unset.
+# The AWS SDK will automatically use the instance's IAM Role credentials.
+# =========================
+aws.s3.accessKey=${AWS_S3_ACCESS_KEY:}
+aws.s3.secretKey=${AWS_S3_SECRET_KEY:}
+aws.ecs.accessKey=${AWS_ECS_ACCESS_KEY:}
+aws.ecs.secretKey=${AWS_ECS_SECRET_KEY:}
 
-# Redis Configuration
-spring.data.redis.host=YOUR_REDIS_HOST
-spring.data.redis.port=12608
-spring.data.redis.password=YOUR_REDIS_PASSWORD
-spring.data.redis.username=default
+# =========================
+# Redis/Valkey Configuration
+# =========================
+spring.data.redis.host=${REDIS_HOST:<AIVEN_REDIS_HOST>}
+spring.data.redis.port=${REDIS_PORT:12608}
+spring.data.redis.password=${REDIS_PASSWORD:<AIVEN_REDIS_PASSWORD>}
+spring.data.redis.username=${REDIS_USERNAME:default}
 spring.data.redis.ssl.enabled=true
 
-# PostgreSQL Configuration
-spring.datasource.url=jdbc:postgresql://YOUR_DB_HOST:5432/postgres
-spring.datasource.username=postgres
-spring.datasource.password=YOUR_DB_PASSWORD
+aiven.hostName=${REDIS_HOST:<AIVEN_REDIS_HOST>}
+aiven.password=${REDIS_PASSWORD:<AIVEN_REDIS_PASSWORD>}
+
+# Task Configuration
+task.idle.timeout.seconds=300
+
+# Nginx Configuration (local/dev only)
+nginx.conf.path=${NGINX_CONF_PATH:/tmp/nginx-configs}
+
+# =========================
+# PostgreSQL (Shared DB with Frontend Deployment Server)
+# =========================
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://<SUPABASE_HOST>:5432/postgres}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:<SUPABASE_USERNAME>}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:<SUPABASE_PASSWORD>}
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.datasource.hikari.maximum-pool-size=3
+
+# Flyway Configuration for BuildServer
+spring.flyway.enabled=true
+spring.flyway.baseline-on-migrate=true
+spring.flyway.locations=classpath:db/migration
+spring.flyway.ignore-migration-patterns=*:missing
