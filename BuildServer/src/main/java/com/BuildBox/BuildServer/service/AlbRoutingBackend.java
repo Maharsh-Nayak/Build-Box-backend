@@ -59,7 +59,7 @@ public class AlbRoutingBackend implements RoutingBackend {
             registerTarget(targetGroupArn, host, port);
 
             // 3. Ensure Listener Rule exists
-            String hostHeader = "api." + project.getSlug() + "." + BASE_DOMAIN;
+            String hostHeader = project.getSlug() + "-api." + BASE_DOMAIN;
             ensureListenerRule(targetGroupArn, hostHeader, project);
 
             System.out.println("✅ ALB: Route ready at https://" + hostHeader);
@@ -77,7 +77,7 @@ public class AlbRoutingBackend implements RoutingBackend {
 
     @Override
     public String getRouteUrl(String projectId) {
-        return "https://api." + projectId + "." + BASE_DOMAIN;
+        return "https://" + projectId + "-api." + BASE_DOMAIN;
     }
 
     private String ensureTargetGroup(String name) {
@@ -226,7 +226,7 @@ public class AlbRoutingBackend implements RoutingBackend {
 
     @Override
     public com.BuildBox.BuildServer.dto.RoutingDetails getRoutingDetails(String projectId) {
-        String hostHeader = "api." + projectId + "." + BASE_DOMAIN;
+        String hostHeader = projectId + "-api." + BASE_DOMAIN;
         String dns = getAlbDns();
         return com.BuildBox.BuildServer.dto.RoutingDetails.alb("http://" + dns, hostHeader);
     }
