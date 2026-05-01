@@ -1,7 +1,6 @@
 package com.BuildBox.BuildServer.controller;
 
 import com.BuildBox.BuildServer.model.Project;
-import com.BuildBox.BuildServer.model.User;
 import com.BuildBox.BuildServer.repository.ProjectRepository;
 import com.BuildBox.BuildServer.service.AsyncBuildExecutor;
 import com.BuildBox.BuildServer.service.TaskRegistry;
@@ -57,33 +56,33 @@ public class InternalAppController {
 
     @PostMapping("/{user}/{project}/start")
     public ResponseEntity<Map<String, String>> startApp(@PathVariable String user, @PathVariable String project) {
-        // Look up project metadata from DB for correct runtime/basePath
-//        Optional<Project> projectOpt = projectRepository.findBySlug(project);
-        System.out.println(project);
-
         TaskInfo task = taskRegistry.getTask(project);
 
         if (task != null && "RUNNING".equals(task.status())) {
             return ResponseEntity.ok(Map.of("status", "ALREADY_RUNNING"));
         }
 
-        Optional<Project> projectOpt = projectRepository.findByName(project);
+        Optional<Project> projectOpt = projectRepository.findBySlug(project);
+        if (projectOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "FAILED",
+                    "message", "Project not found for slug: " + project));
+        }
 
+        Project projectMetadata = projectOpt.get();
         String runtime = (project.contains("python") || project.contains("flask")) ? "python" : "node";
-        String basePath = null;
+        String basePath = projectMetadata.getBasePath();
+        String repoUrl = projectMetadata.getRepoUrl();
 
-        if (projectOpt.isPresent()) {
-            System.out.println(projectOpt.get());
-            basePath = projectOpt.get().getBasePath();
-            // Optional: runtime could also be stored in DB, but slug-based inference is
-            // okay for now
+        if (repoUrl == null || repoUrl.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "FAILED",
+                    "message", "Project has no repoUrl; cannot cold start"));
         }
 
         System.out.println("DEBUG: Cold start for " + project + " | basePath: " + basePath + " | runtime: " + runtime);
 
-        // Trigger local build/start sequence with correct basePath
-//        executor.startBuildLocal(project, runtime, null, basePath, null);
-        executor.startBuild(project, runtime, null, basePath, null);
+        executor.startBuild(project, runtime, null, basePath, repoUrl);
 
         return ResponseEntity.accepted().body(Map.of("status", "STARTING"));
     }

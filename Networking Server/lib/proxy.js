@@ -153,11 +153,12 @@ class ReverseProxy {
                     // ALB-First Routing Mode
                     console.log(`[Backend] ALB Mode: Proxying to ${routing.targetUrl} with Host: ${routing.hostHeader}`);
 
+                    req.headers.host = routing.hostHeader;
                     this.proxy.web(req, res, {
                         target: routing.targetUrl,
-                        changeOrigin: true,
+                        changeOrigin: false,
                         headers: {
-                            host: routing.hostHeader
+                            Host: routing.hostHeader
                         }
                     });
                     return;
@@ -189,10 +190,11 @@ class ReverseProxy {
 
                     if (routing && routing.mode === 'alb') {
                         console.log(`[Backend] Cold Start (ALB Mode) Complete. Proxying to: ${routing.targetUrl}`);
+                        req.headers.host = routing.hostHeader;
                         this.proxy.web(req, res, {
                             target: routing.targetUrl,
-                            changeOrigin: true,
-                            headers: { host: routing.hostHeader }
+                            changeOrigin: false,
+                            headers: { Host: routing.hostHeader }
                         });
                     } else {
                         const target = `http://${t.host}:${t.port}`;

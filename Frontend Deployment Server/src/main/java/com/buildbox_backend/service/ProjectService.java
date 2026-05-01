@@ -22,14 +22,15 @@ public class ProjectService {
     public Project createProject(String name, String repoUrl, String basePath, User user) {
         Project project = new Project();
         project.setName(name);
-        project.setSlug(generateSlug(name));
+        String slug = generateSlug(name);
+        project.setSlug(slug);
         project.setRepoUrl(repoUrl);
         project.setBasePath(basePath);
         project.setUser(user);
         project.setCreatedAt(LocalDateTime.now());
 
-        project.setDeploy_url("https://buildbox-frontend.s3.ap-south-1.amazonaws.com/"+user.getId()+"/"+name+"/Frontend/index.html");
-        project.setBackend_link("api."+name+".localhost:8000");
+        project.setDeploy_url("https://buildbox-frontend.s3.ap-south-1.amazonaws.com/"+user.getId()+"/"+slug+"/Frontend/index.html");
+        project.setBackend_link("api."+slug+".localhost:8000");
 
         Project saved = projectRepository.save(project);
         activityService.log(user.getId(), saved.getId(), "Created project: " + name);

@@ -91,7 +91,8 @@ public class AlbRoutingBackend implements RoutingBackend {
                     .port(80) // Default internal app port
                     .vpcId(getVpcId())
                     .targetType(TargetTypeEnum.INSTANCE) // ALB INSTANCE type requires EC2 instance ID, not IP
-                    .healthCheckPath("/health")
+                    .healthCheckPath("/")
+                    .matcher(Matcher.builder().httpCode("200-499").build())
                     .healthCheckIntervalSeconds(30)
                     .healthyThresholdCount(2)
                     .unhealthyThresholdCount(2));
