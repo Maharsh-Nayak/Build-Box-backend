@@ -52,8 +52,8 @@ class ReverseProxy {
 
         const parts = hostname.split('.');
 
-        if (hostname.endsWith('buildbox.com')) {
-            // production pattern: api.project-name.buildbox.com OR project-name.buildbox.com
+        if (hostname.endsWith('buildbox.tech')) {
+            // production pattern: api.project-name.buildbox.tech OR project-name.buildbox.tech
             // Note: We don't use hostname-based user anymore, we look it up from project DB
             if (parts[0] === 'api') {
                 type = 'BACKEND';
