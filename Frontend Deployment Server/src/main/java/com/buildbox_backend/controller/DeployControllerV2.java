@@ -44,12 +44,6 @@ public class DeployControllerV2 {
 
         System.out.println(request.getUserId());
 
-        Map<String, String> Ids = ecsService.startBuild(request.getLink(), request.getProjectName(),
-                request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory(), request.getFrontendEnvVars(), request.getBackendEnvVars());
-
-        String buildId = Ids.get("buildId");
-        String taskId = Ids.get("taskId");
-
         Optional<User> u = userRepository.findById(Long.valueOf(request.getUserId()));
         var createdProject = projectService.createProject(
             request.getProjectName(),
@@ -58,6 +52,19 @@ public class DeployControllerV2 {
             u.get());
 
         String slug = createdProject.getSlug();
+
+        // Automatically inject the backend API URL for the frontend build
+        Map<String, String> frontendEnvs = request.getFrontendEnvVars();
+        if (frontendEnvs == null) {
+            frontendEnvs = new java.util.HashMap<>();
+        }
+        frontendEnvs.put("VITE_API_URL", "https://" + slug + "-api.buildbox.tech");
+
+        Map<String, String> Ids = ecsService.startBuild(request.getLink(), request.getProjectName(),
+                request.getUserId(), request.getBackendDirectory(), request.getFrontendDirectory(), frontendEnvs, request.getBackendEnvVars());
+
+        String buildId = Ids.get("buildId");
+        String taskId = Ids.get("taskId");
 
         // Save env vars to deployment_environments so BuildServer injects them at container start
         if (request.getBackendEnvVars() != null) {
